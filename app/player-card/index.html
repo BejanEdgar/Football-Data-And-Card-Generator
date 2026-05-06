@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>⚽ Player Card Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@600;700&family=Oxanium:wght@400;600;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+  .nav-back{position:fixed;top:14px;right:20px;z-index:999}
+  .nav-back a{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 16px;background:#0d1018;border:1px solid #1e2840;
+    border-radius:8px;color:#c8ff00;font-family:'Bebas Neue',cursive;
+    font-size:.85rem;letter-spacing:2px;text-decoration:none;
+    transition:all .2s}
+  .nav-back a:hover{background:rgba(200,255,0,.1);border-color:#c8ff00}
+</style>
+</head>
+<body>
+
+<div class="nav-back">
+  <a href="../index.html">← MENIU PRINCIPAL</a>
+</div>
+
+
+<header>
+  <div>
+    <h1>⚽ Player Card Generator</h1>
+    <div class="badge">PNG EXPORT</div>
+  </div>
+</header>
+
+<div class="studio">
+  <!-- ══ CONTROLS ══ -->
+  <div class="controls">
+
+    <div class="group">
+      <div class="sec-title">Jucător</div>
+      <label class="lbl">Prenume</label>
+      <input type="text" id="firstName" placeholder="Darwin" value="Darwin"/>
+      <label class="lbl">Nume familie (afisat pe card)</label>
+      <input type="text" id="lastName" placeholder="Nunez" value="Nunez"/>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Rating & Poziție</div>
+      <div class="row2">
+        <div>
+          <label class="lbl">Rating</label>
+          <input type="number" id="rating" min="1" max="110" value="84"/>
+        </div>
+        <div>
+          <label class="lbl">Poziție</label>
+          <select id="position">
+            <option>ST</option><option>CF</option><option>CAM</option>
+            <option>LW</option><option>RW</option><option>CM</option>
+            <option>CDM</option><option>LB</option><option>RB</option>
+            <option>CB</option><option>GK</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Stele</div>
+      <div class="stars-pick" id="starsPick">
+        <button data-v="1">★</button>
+        <button data-v="2">★★</button>
+        <button data-v="3">★★★</button>
+        <button data-v="4" class="active">★★★★</button>
+        <button data-v="5">★★★★★</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Imagine Fundal</div>
+      <div class="upload-zone" id="bgZone">
+        <input type="file" id="bgFile" accept="image/*"/>
+        <div class="icon">🖼️</div>
+        <p>Click sau trage imaginea de fundal</p>
+        <img class="preview-thumb" id="bgThumb" style="display:none"/>
+      </div>
+      <label class="lbl" style="margin-top:6px">Sau culoare fundal</label>
+      <div class="color-row">
+        <input type="color" id="bgColor" value="#44cc00"/>
+        <span style="font-size:.82rem;color:var(--txt2)">Folosit dacă nu e imagine</span>
+      </div>
+
+      <!-- ══ BIBLIOTECA PERSONALĂ ══ -->
+      <div class="bg-lib-header">
+        <label class="lbl" style="margin:0">Biblioteca mea de fundaluri</label>
+        <span class="bg-lib-count" id="bgLibCount"></span>
+      </div>
+      <!-- Buton deschidere folder local -->
+      <div class="bg-lib-folder-btn" id="bgFolderBtn" title="Selectează folderul cu imaginile tale de fundal">
+        <input type="file" id="bgFolderInput" accept="image/*" multiple webkitdirectory/>
+        📁 Deschide folder local
+      </div>
+      <div class="bg-lib-grid" id="bgLibGrid">
+        <!-- renderizat dinamic de JS -->
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Imagine Jucător</div>
+      <div class="upload-zone" id="playerZone">
+        <input type="file" id="playerFile" accept="image/*"/>
+        <div class="icon">🧍</div>
+        <p>Click sau trage imaginea jucătorului</p>
+        <img class="preview-thumb" id="playerThumb" style="display:none"/>
+      </div>
+
+      <!-- ══ REMOVE BACKGROUND ══ -->
+      <div style="margin-top:10px;padding:12px;background:#0d1018;border:1px solid #1e2840;border-radius:10px">
+        <div class="sec-title" style="font-size:.9rem;margin-bottom:8px">✂️ Șterge fundal (AI)</div>
+        <button id="removeBgBtn" style="width:100%;padding:11px;border:none;border-radius:8px;background:linear-gradient(135deg,#c8ff00,#8fff00);color:#000;font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:2px;cursor:pointer;transition:all .2s;font-weight:700">✂️ ȘTERGE FUNDAL</button>
+        <div id="removeBgStatus" style="display:none;margin-top:8px;padding:8px 10px;border-radius:7px;font-size:.78rem;font-weight:600;letter-spacing:.5px"></div>
+        <div class="gif-progress" id="removeBgProgress" style="margin-top:6px"><div class="gif-progress-bar" id="removeBgBar"></div></div>
+        <p style="font-size:.7rem;color:var(--txt2);margin-top:7px;line-height:1.4">AI local în browser — fără API key, similar cu remove.bg. Prima utilizare descarcă modelul (~25MB, se cachează).</p>
+      </div>
+
+      <label class="lbl" style="margin-top:8px">Scală jucător</label>
+      <div class="range-label"><span>Mic</span><span id="scaleVal">100%</span><span>Mare</span></div>
+      <input type="range" id="playerScale" min="30" max="200" value="100"/>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn-reset" id="resetPos">↺ Resetează poziție</button>
+        <button class="btn-reset" id="mirrorPlayer">⇄ Oglindă</button>
+      </div>
+    </div>
+
+  </div><!-- /controls -->
+
+  <!-- ══ PREVIEW ══ -->
+  <div class="preview-area">
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="card" width="400" height="560"></canvas>
+      <canvas id="effectOverlay" width="400" height="560" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
+    </div>
+    <div class="hint-bar">🖱️ Trage imaginea jucătorului pentru a o repoziţiona &nbsp;·&nbsp; Scroll pentru zoom</div>
+  </div>
+
+  <!-- ══ CONTROLS RIGHT ══ -->
+  <div class="controls-right">
+
+    <div class="group">
+      <div class="sec-title">Logo Club / Ligă</div>
+      <div class="upload-zone" id="logoZone">
+        <input type="file" id="logoFile" accept="image/*"/>
+        <div class="icon">🏆</div>
+        <p>Click sau trage logo-ul clubului/ligii</p>
+        <img class="preview-thumb" id="logoThumb" style="display:none"/>
+      </div>
+
+      <!-- ══ SELECTOR CLUB ══ -->
+      <label class="lbl" style="margin-top:10px">Sau caută club</label>
+      <div class="cs-wrap" id="csClubWrap">
+        <div class="cs-field" id="csClubField">
+          <img class="cs-icon" id="csClubIcon" src="" alt="" style="display:none"/>
+          <input class="cs-input" id="csClubInput" placeholder="Barcelona, Real Madrid…" autocomplete="off"/>
+          <span class="cs-clear" id="csClubClear">✕</span>
+        </div>
+        <div class="cs-dropdown" id="csClubDropdown"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Naționalitate / Steag</div>
+      <!-- ══ SELECTOR NAȚIONALITATE ══ -->
+      <div class="cs-wrap" id="csNatWrap">
+        <div class="cs-field" id="csNatField">
+          <span class="cs-flag-icon" id="csNatFlag"></span>
+          <input class="cs-input" id="csNatInput" placeholder="France, Spain, Brazil…" autocomplete="off"/>
+          <span class="cs-clear" id="csNatClear">✕</span>
+        </div>
+        <div class="cs-dropdown" id="csNatDropdown"></div>
+      </div>
+      <!-- Preview steag curent -->
+      <div class="flag-preview-row" id="flagPreviewRow">
+        <img class="flag-thumb" id="flagThumbPreview" src="" alt=""/>
+        <span class="flag-name" id="flagNamePreview"></span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Stil Text</div>
+      <div class="row2">
+        <div>
+          <label class="lbl">Culoare Rating</label>
+          <div class="color-row">
+            <input type="color" id="ratingColor" value="#ffffff"/>
+          </div>
+        </div>
+        <div>
+          <label class="lbl">Culoare Nume</label>
+          <div class="color-row">
+            <input type="color" id="nameColor" value="#c8ff00"/>
+          </div>
+        </div>
+      </div>
+      <label class="lbl" style="margin-top:6px">Contur text (shadow)</label>
+      <select id="textShadow">
+        <option value="strong">Puternic (recomandat)</option>
+        <option value="medium">Mediu</option>
+        <option value="none">Fără</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ══ FIFA CARD EFFECTS ══ -->
+    <div class="group">
+      <div class="sec-title">Efecte Card FIFA</div>
+      <div class="effect-grid" id="effectPick">
+        <button class="effect-btn" data-e="none">
+          <span class="effect-icon">⬛</span>FĂRĂ
+        </button>
+        <button class="effect-btn active" data-e="gold">
+          <span class="effect-icon">🥇</span>GOLD
+        </button>
+        <button class="effect-btn" data-e="silver">
+          <span class="effect-icon">🥈</span>SILVER
+        </button>
+        <button class="effect-btn" data-e="inform">
+          <span class="effect-icon">🟩</span>INFORM
+        </button>
+        <button class="effect-btn" data-e="special">
+          <span class="effect-icon">🌈</span>SPECIAL
+        </button>
+        <button class="effect-btn" data-e="toty">
+          <span class="effect-icon">👑</span>TOTY
+        </button>
+        <button class="effect-btn" data-e="ucl">
+          <span class="effect-icon">🏆</span>UCL
+        </button>
+        <button class="effect-btn" data-e="uel">
+          <span class="effect-icon">🟠</span>UEL
+        </button>
+        <button class="effect-btn" data-e="uecl">
+          <span class="effect-icon">🟢</span>UECL
+        </button>
+        <button class="effect-btn" data-e="tott">
+          <span class="effect-icon">🌟</span>TOTT
+        </button>
+        <button class="effect-btn" data-e="heroes">
+          <span class="effect-icon">⚔️</span>HEROES
+        </button>
+        <button class="effect-btn" data-e="ptg">
+          <span class="effect-icon">🔥</span>PATH TO GLORY
+        </button>
+        <button class="effect-btn" data-e="thunderstruck">
+          <span class="effect-icon">⚡</span>THUNDER
+        </button>
+        <button class="effect-btn" data-e="wildcards">
+          <span class="effect-icon">❄️</span>WILDCARDS
+        </button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ══ EFECTE ANIMATE ══ -->
+    <div class="group">
+      <div class="sec-title">Efecte Animate</div>
+      <div class="anim-effect-grid" id="animEffectPick">
+        <button class="anim-btn active" data-a="none">
+          <span class="anim-icon">⬛</span>FĂRĂ
+        </button>
+        <button class="anim-btn" data-a="pulse">
+          <span class="anim-icon">💥</span>PULSE
+        </button>
+        <button class="anim-btn" data-a="fire">
+          <span class="anim-icon">🔥</span>FIRE
+        </button>
+        <button class="anim-btn" data-a="plasma">
+          <span class="anim-icon">⚡</span>PLASMA
+        </button>
+        <button class="anim-btn" data-a="ice">
+          <span class="anim-icon">❄️</span>ICE
+        </button>
+        <button class="anim-btn" data-a="aurora">
+          <span class="anim-icon">🌌</span>AURORA
+        </button>
+        <button class="anim-btn" data-a="tots">
+          <span class="anim-icon">💎</span>TOTS
+        </button>
+        <button class="anim-btn" data-a="hero">
+          <span class="anim-icon">🎃</span>HALLOWEEN
+        </button>
+        <button class="anim-btn" data-a="icon">
+          <span class="anim-icon">👑</span>ICON
+        </button>
+        <button class="anim-btn" data-a="rulebreaker">
+          <span class="anim-icon">⚠️</span>RULEBREAK
+        </button>
+        <button class="anim-btn" data-a="showdown">
+          <span class="anim-icon">💥</span>SHOWDOWN
+        </button>
+        <button class="anim-btn" data-a="motm">
+          <span class="anim-icon">⭐</span>MOTM
+        </button>
+        <button class="anim-btn" data-a="flashback">
+          <span class="anim-icon">📼</span>FLASHBACK
+        </button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="sec-title">Format Card</div>
+      <div class="dim-toggle">
+        <button class="dim-btn active" data-w="400" data-h="560">Portret</button>
+        <button class="dim-btn" data-w="560" data-h="400">Landscape</button>
+        <button class="dim-btn" data-w="500" data-h="500">Pătrat</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn-export" id="exportBtn">⬇ EXPORTĂ PNG</button>
+    <button class="btn-export-gif" id="exportGifBtn">🎞 EXPORTĂ GIF ANIMAT</button>
+    <div class="gif-progress" id="gifProgress"><div class="gif-progress-bar" id="gifBar"></div></div>
+
+  </div><!-- /controls-right -->
+
+</div><!-- /studio -->
+
+<script src="script.js"></script>
+</body>
+</html>

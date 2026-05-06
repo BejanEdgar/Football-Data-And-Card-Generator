@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Card Generator - Excel Creator</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700;900&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+      .nav-back{position:fixed;top:14px;right:20px;z-index:9999}
+      .nav-back a{
+        display:inline-flex;align-items:center;gap:8px;
+        padding:8px 16px;background:rgba(15,20,25,.9);border:1px solid #1e3a5f;
+        border-radius:8px;color:#ffd700;font-family:'Bebas Neue',cursive;
+        font-size:.85rem;letter-spacing:2px;text-decoration:none;
+        backdrop-filter:blur(6px);transition:all .2s}
+      .nav-back a:hover{background:rgba(255,215,0,.1);border-color:#ffd700}
+    </style>
+</head>
+<body>
+    <div class="nav-back">
+      <a href="../index.html">← MENIU PRINCIPAL</a>
+    </div>
+
+    <div id="root"></div>
+
+    <!-- Baza de date jucători -->
+    <script src="../shared/players_db.js"></script>
+
+    <!-- Date statice: COUNTRIES + CLUBS -->
+    <script>
+const COUNTRIES = [{"name": "Afghanistan", "code": "AF", "flag": "🇦🇫"}, {"name": "Albania", "code": "AL", "flag": "🇦🇱"}, {"name": "Algeria", "code": "DZ", "flag": "🇩🇿"}, {"name": "Andorra", "code": "AD", "flag": "🇦🇩"}, {"name": "Angola", "code": "AO", "flag": "🇦🇴"}, {"name": "Argentina", "code": "AR", "flag": "🇦🇷"}, {"name": "Armenia", "code": "AM", "flag": "🇦🇲"}, {"name": "Australia", "code": "AU", "flag": "🇦🇺"}, {"name": "Austria", "code": "AT", "flag": "🇦🇹"}, {"name": "Azerbaijan", "code": "AZ", "flag": "🇦🇿"}, {"name": "Bahamas", "code": "BS", "flag": "🇧🇸"}, {"name": "Bahrain", "code": "BH", "flag": "🇧🇭"}, {"name": "Bangladesh", "code": "BD", "flag": "🇧🇩"}, {"name": "Barbados", "code": "BB", "flag": "🇧🇧"}, {"name": "Belarus", "code": "BY", "flag": "🇧🇾"}, {"name": "Belgium", "code": "BE", "flag": "🇧🇪"}, {"name": "Belize", "code": "BZ", "flag": "🇧🇿"}, {"name": "Benin", "code": "BJ", "flag": "🇧🇯"}, {"name": "Bhutan", "code": "BT", "flag": "🇧🇹"}, {"name": "Bolivia", "code": "BO", "flag": "🇧🇴"},  {"name": "England", "code": "GB-ENG", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿"}, {"name": "Bosnia and Herzegovina", "code": "BA", "flag": "🇧🇦"}, {"name": "Botswana", "code": "BW", "flag": "🇧🇼"}, {"name": "Brazil", "code": "BR", "flag": "🇧🇷"}, {"name": "Brunei", "code": "BN", "flag": "🇧🇳"}, {"name": "Bulgaria", "code": "BG", "flag": "🇧🇬"}, {"name": "Burkina Faso", "code": "BF", "flag": "🇧🇫"}, {"name": "Burundi", "code": "BI", "flag": "🇧🇮"}, {"name": "Cambodia", "code": "KH", "flag": "🇰🇭"}, {"name": "Cameroon", "code": "CM", "flag": "🇨🇲"}, {"name": "Canada", "code": "CA", "flag": "🇨🇦"}, {"name": "Cape Verde", "code": "CV", "flag": "🇨🇻"}, {"name": "Central African Republic", "code": "CF", "flag": "🇨🇫"}, {"name": "Chad", "code": "TD", "flag": "🇹🇩"}, {"name": "Chile", "code": "CL", "flag": "🇨🇱"}, {"name": "China", "code": "CN", "flag": "🇨🇳"}, {"name": "Colombia", "code": "CO", "flag": "🇨🇴"}, {"name": "Comoros", "code": "KM", "flag": "🇰🇲"}, {"name": "Congo", "code": "CG", "flag": "🇨🇬"}, {"name": "Costa Rica", "code": "CR", "flag": "🇨🇷"}, {"name": "Croatia", "code": "HR", "flag": "🇭🇷"}, {"name": "Cuba", "code": "CU", "flag": "🇨🇺"}, {"name": "Cyprus", "code": "CY", "flag": "🇨🇾"}, {"name": "Czech Republic", "code": "CZ", "flag": "🇨🇿"}, {"name": "Denmark", "code": "DK", "flag": "🇩🇰"}, {"name": "Djibouti", "code": "DJ", "flag": "🇩🇯"}, {"name": "Dominica", "code": "DM", "flag": "🇩🇲"}, {"name": "Dominican Republic", "code": "DO", "flag": "🇩🇴"}, {"name": "Ecuador", "code": "EC", "flag": "🇪🇨"}, {"name": "Egypt", "code": "EG", "flag": "🇪🇬"}, {"name": "El Salvador", "code": "SV", "flag": "🇸🇻"}, {"name": "Equatorial Guinea", "code": "GQ", "flag": "🇬🇶"}, {"name": "Eritrea", "code": "ER", "flag": "🇪🇷"}, {"name": "Estonia", "code": "EE", "flag": "🇪🇪"}, {"name": "Eswatini", "code": "SZ", "flag": "🇸🇿"}, {"name": "Ethiopia", "code": "ET", "flag": "🇪🇹"}, {"name": "Fiji", "code": "FJ", "flag": "🇫🇯"}, {"name": "Finland", "code": "FI", "flag": "🇫🇮"}, {"name": "France", "code": "FR", "flag": "🇫🇷"}, {"name": "Gabon", "code": "GA", "flag": "🇬🇦"}, {"name": "Gambia", "code": "GM", "flag": "🇬🇲"}, {"name": "Georgia", "code": "GE", "flag": "🇬🇪"}, {"name": "Germany", "code": "DE", "flag": "🇩🇪"}, {"name": "Ghana", "code": "GH", "flag": "🇬🇭"}, {"name": "Greece", "code": "GR", "flag": "🇬🇷"}, {"name": "Grenada", "code": "GD", "flag": "🇬🇩"}, {"name": "Guatemala", "code": "GT", "flag": "🇬🇹"}, {"name": "Guinea", "code": "GN", "flag": "🇬🇳"}, {"name": "Guinea-Bissau", "code": "GW", "flag": "🇬🇼"}, {"name": "Guyana", "code": "GY", "flag": "🇬🇾"}, {"name": "Haiti", "code": "HT", "flag": "🇭🇹"}, {"name": "Honduras", "code": "HN", "flag": "🇭🇳"}, {"name": "Hungary", "code": "HU", "flag": "🇭🇺"}, {"name": "Iceland", "code": "IS", "flag": "🇮🇸"}, {"name": "India", "code": "IN", "flag": "🇮🇳"}, {"name": "Indonesia", "code": "ID", "flag": "🇮🇩"}, {"name": "Iran", "code": "IR", "flag": "🇮🇷"}, {"name": "Iraq", "code": "IQ", "flag": "🇮🇶"}, {"name": "Ireland", "code": "IE", "flag": "🇮🇪"}, {"name": "Israel", "code": "IL", "flag": "🇮🇱"}, {"name": "Italy", "code": "IT", "flag": "🇮🇹"}, {"name": "Ivory Coast", "code": "CI", "flag": "🇨🇮"}, {"name": "Jamaica", "code": "JM", "flag": "🇯🇲"}, {"name": "Japan", "code": "JP", "flag": "🇯🇵"}, {"name": "Jordan", "code": "JO", "flag": "🇯🇴"}, {"name": "Kazakhstan", "code": "KZ", "flag": "🇰🇿"}, {"name": "Kenya", "code": "KE", "flag": "🇰🇪"}, {"name": "Kiribati", "code": "KI", "flag": "🇰🇮"}, {"name": "Kuwait", "code": "KW", "flag": "🇰🇼"}, {"name": "Kyrgyzstan", "code": "KG", "flag": "🇰🇬"}, {"name": "Laos", "code": "LA", "flag": "🇱🇦"}, {"name": "Latvia", "code": "LV", "flag": "🇱🇻"}, {"name": "Lebanon", "code": "LB", "flag": "🇱🇧"}, {"name": "Lesotho", "code": "LS", "flag": "🇱🇸"}, {"name": "Liberia", "code": "LR", "flag": "🇱🇷"}, {"name": "Libya", "code": "LY", "flag": "🇱🇾"}, {"name": "Liechtenstein", "code": "LI", "flag": "🇱🇮"}, {"name": "Lithuania", "code": "LT", "flag": "🇱🇹"}, {"name": "Luxembourg", "code": "LU", "flag": "🇱🇺"}, {"name": "Madagascar", "code": "MG", "flag": "🇲🇬"}, {"name": "Malawi", "code": "MW", "flag": "🇲🇼"}, {"name": "Malaysia", "code": "MY", "flag": "🇲🇾"}, {"name": "Maldives", "code": "MV", "flag": "🇲🇻"}, {"name": "Mali", "code": "ML", "flag": "🇲🇱"}, {"name": "Malta", "code": "MT", "flag": "🇲🇹"}, {"name": "Mauritania", "code": "MR", "flag": "🇲🇷"}, {"name": "Mauritius", "code": "MU", "flag": "🇲🇺"}, {"name": "Mexico", "code": "MX", "flag": "🇲🇽"}, {"name": "Moldova", "code": "MD", "flag": "🇲🇩"}, {"name": "Monaco", "code": "MC", "flag": "🇲🇨"}, {"name": "Mongolia", "code": "MN", "flag": "🇲🇳"}, {"name": "Montenegro", "code": "ME", "flag": "🇲🇪"}, {"name": "Morocco", "code": "MA", "flag": "🇲🇦"}, {"name": "Mozambique", "code": "MZ", "flag": "🇲🇿"}, {"name": "Myanmar", "code": "MM", "flag": "🇲🇲"}, {"name": "Namibia", "code": "NA", "flag": "🇳🇦"}, {"name": "Nepal", "code": "NP", "flag": "🇳🇵"}, {"name": "Netherlands", "code": "NL", "flag": "🇳🇱"}, {"name": "New Zealand", "code": "NZ", "flag": "🇳🇿"}, {"name": "Nicaragua", "code": "NI", "flag": "🇳🇮"}, {"name": "Niger", "code": "NE", "flag": "🇳🇪"}, {"name": "Nigeria", "code": "NG", "flag": "🇳🇬"}, {"name": "North Korea", "code": "KP", "flag": "🇰🇵"}, {"name": "North Macedonia", "code": "MK", "flag": "🇲🇰"}, {"name": "Norway", "code": "NO", "flag": "🇳🇴"}, {"name": "Oman", "code": "OM", "flag": "🇴🇲"}, {"name": "Pakistan", "code": "PK", "flag": "🇵🇰"}, {"name": "Palestine", "code": "PS", "flag": "🇵🇸"}, {"name": "Panama", "code": "PA", "flag": "🇵🇦"}, {"name": "Papua New Guinea", "code": "PG", "flag": "🇵🇬"}, {"name": "Paraguay", "code": "PY", "flag": "🇵🇾"}, {"name": "Peru", "code": "PE", "flag": "🇵🇪"}, {"name": "Philippines", "code": "PH", "flag": "🇵🇭"}, {"name": "Poland", "code": "PL", "flag": "🇵🇱"}, {"name": "Portugal", "code": "PT", "flag": "🇵🇹"}, {"name": "Qatar", "code": "QA", "flag": "🇶🇦"}, {"name": "Romania", "code": "RO", "flag": "🇷🇴"}, {"name": "Russia", "code": "RU", "flag": "🇷🇺"}, {"name": "Rwanda", "code": "RW", "flag": "🇷🇼"}, {"name": "Saudi Arabia", "code": "SA", "flag": "🇸🇦"}, {"name": "Scotland", "code": "GB-SCT", "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"}, {"name": "Senegal", "code": "SN", "flag": "🇸🇳"}, {"name": "Serbia", "code": "RS", "flag": "🇷🇸"}, {"name": "Singapore", "code": "SG", "flag": "🇸🇬"}, {"name": "Slovakia", "code": "SK", "flag": "🇸🇰"}, {"name": "Slovenia", "code": "SI", "flag": "🇸🇮"}, {"name": "Somalia", "code": "SO", "flag": "🇸🇴"}, {"name": "South Africa", "code": "ZA", "flag": "🇿🇦"}, {"name": "South Korea", "code": "KR", "flag": "🇰🇷"}, {"name": "South Sudan", "code": "SS", "flag": "🇸🇸"}, {"name": "Spain", "code": "ES", "flag": "🇪🇸"}, {"name": "Sri Lanka", "code": "LK", "flag": "🇱🇰"}, {"name": "Sudan", "code": "SD", "flag": "🇸🇩"}, {"name": "Suriname", "code": "SR", "flag": "🇸🇷"}, {"name": "Sweden", "code": "SE", "flag": "🇸🇪"}, {"name": "Switzerland", "code": "CH", "flag": "🇨🇭"}, {"name": "Syria", "code": "SY", "flag": "🇸🇾"}, {"name": "Taiwan", "code": "TW", "flag": "🇹🇼"}, {"name": "Tajikistan", "code": "TJ", "flag": "🇹🇯"}, {"name": "Tanzania", "code": "TZ", "flag": "🇹🇿"}, {"name": "Thailand", "code": "TH", "flag": "🇹🇭"}, {"name": "Togo", "code": "TG", "flag": "🇹🇬"}, {"name": "Trinidad and Tobago", "code": "TT", "flag": "🇹🇹"}, {"name": "Tunisia", "code": "TN", "flag": "🇹🇳"}, {"name": "Turkey", "code": "TR", "flag": "🇹🇷"}, {"name": "Turkmenistan", "code": "TM", "flag": "🇹🇲"}, {"name": "Uganda", "code": "UG", "flag": "🇺🇬"}, {"name": "Ukraine", "code": "UA", "flag": "🇺🇦"}, {"name": "United Arab Emirates", "code": "AE", "flag": "🇦🇪"}, {"name": "United Kingdom", "code": "GB", "flag": "🇬🇧"}, {"name": "United States", "code": "US", "flag": "🇺🇸"}, {"name": "Uruguay", "code": "UY", "flag": "🇺🇾"}, {"name": "Uzbekistan", "code": "UZ", "flag": "🇺🇿"}, {"name": "Vatican City", "code": "VA", "flag": "🇻🇦"}, {"name": "Venezuela", "code": "VE", "flag": "🇻🇪"}, {"name": "Vietnam", "code": "VN", "flag": "🇻🇳"}, {"name": "Wales", "code": "GB-WLS", "flag": "🏴󠁧󠁢󠁷󠁬󠁳󠁿"}, {"name": "Yemen", "code": "YE", "flag": "🇾🇪"}, {"name": "Zambia", "code": "ZM", "flag": "🇿🇲"}, {"name": "Zimbabwe", "code": "ZW", "flag": "🇿🇼"}];
+const CLUBS = [
+  { name: "Atletico Madrid", logo: "https://media.api-sports.io/football/teams/530.png" },
+  { name: "Barcelona", logo: "https://media.api-sports.io/football/teams/529.png" },
+  { name: "Bayern Munchen", logo: "https://media.api-sports.io/football/teams/157.png" },
+  { name: "Bayer Leverkusen", logo: "https://media.api-sports.io/football/teams/168.png" },
+  { name: "Borussia Dortmund", logo: "https://media.api-sports.io/football/teams/165.png" },
+  { name: "Borussia M'gladbach", logo: "https://media.api-sports.io/football/teams/163.png" }, // doar în lista 1
+  { name: "Chelsea", logo: "https://media.api-sports.io/football/teams/49.png" },
+  { name: "Inter", logo: "https://media.api-sports.io/football/teams/505.png" },
+  { name: "Juventus", logo: "https://media.api-sports.io/football/teams/496.png" },
+  { name: "Liverpool", logo: "https://media.api-sports.io/football/teams/40.png" },
+  { name: "Manchester City", logo: "https://media.api-sports.io/football/teams/50.png" },
+  { name: "Manchester United", logo: "https://media.api-sports.io/football/teams/33.png" },
+  { name: "Milan", logo: "https://media.api-sports.io/football/teams/489.png" },
+  { name: "Napoli", logo: "https://media.api-sports.io/football/teams/492.png" },
+  { name: "Paris Saint-Germain", logo: "https://media.api-sports.io/football/teams/85.png" },
+  { name: "Real Madrid", logo: "https://media.api-sports.io/football/teams/541.png" },
+  { name: "Arsenal", logo: "https://media.api-sports.io/football/teams/42.png" },
+  { name: "Tottenham", logo: "https://media.api-sports.io/football/teams/47.png" },
+  { name: "Aston Villa", logo: "https://media.api-sports.io/football/teams/66.png" },
+  { name: "Roma", logo: "https://media.api-sports.io/football/teams/497.png" },
+  { name: "Lazio", logo: "https://media.api-sports.io/football/teams/487.png" },
+  { name: "Benfica", logo: "https://media.api-sports.io/football/teams/211.png" },
+  { name: "Porto", logo: "https://media.api-sports.io/football/teams/212.png" },
+  { name: "Ajax", logo: "https://media.api-sports.io/football/teams/194.png" },
+  { name: "PSV", logo: "https://media.api-sports.io/football/teams/197.png" },
+  { name: "Sevilla", logo: "https://media.api-sports.io/football/teams/536.png" },
+  { name: "Valencia", logo: "https://media.api-sports.io/football/teams/532.png" },
+  { name: "Villarreal", logo: "https://media.api-sports.io/football/teams/533.png" },
+  { name: "RB Leipzig", logo: "https://media.api-sports.io/football/teams/173.png" },
+  { name: "Celtic", logo: "https://media.api-sports.io/football/teams/257.png" },
+  { name: "Rangers", logo: "https://media.api-sports.io/football/teams/256.png" },
+  { name: "Galatasaray", logo: "https://media.api-sports.io/football/teams/645.png" },
+  { name: "Fenerbahce", logo: "https://media.api-sports.io/football/teams/611.png" },
+  { name: "Besiktas", logo: "https://media.api-sports.io/football/teams/609.png" },
+  { name: "Sporting", logo: "https://media.api-sports.io/football/teams/228.png" },
+  { name: "Dinamo Kiev", logo: "https://media.api-sports.io/football/teams/369.png" },
+  { name: "Marseille", logo: "https://media.api-sports.io/football/teams/81.png" },
+  { name: "Lyon", logo: "https://media.api-sports.io/football/teams/80.png" },
+  { name: "Monaco", logo: "https://media.api-sports.io/football/teams/91.png" },
+  { name: "Atalanta", logo: "https://media.api-sports.io/football/teams/499.png" },
+  { name: "Fiorentina", logo: "https://media.api-sports.io/football/teams/502.png" },
+  { name: "Eintracht Frankfurt", logo: "https://media.api-sports.io/football/teams/169.png" },
+  { name: "Werder Bremen", logo: "https://media.api-sports.io/football/teams/162.png" },
+  { name: "Newcastle", logo: "https://media.api-sports.io/football/teams/34.png" },
+  { name: "West Ham", logo: "https://media.api-sports.io/football/teams/48.png" },
+  { name: "Legends", logo: "https://cdn-p2.frzdb.net/fifamobile/images/leagueLogos_22/2118.png?v=848rffjv3wehttps://image.pngaaa.com/236/6778236-middle.png.png" },
+];
+
+
+    </script>
+
+    <!-- React App (Babel) inline -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        function CustomSelect({ value, icon, iconType, options, onChange, placeholder }) {
+            const [open, setOpen] = useState(false);
+            const [search, setSearch] = useState('');
+            const wrapRef = useRef(null);
+
+            useEffect(() => {
+                const handler = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) { setOpen(false); setSearch(''); } };
+                document.addEventListener('mousedown', handler);
+                return () => document.removeEventListener('mousedown', handler);
+            }, []);
+
+            const filtered = options.filter(o =>
+                o.name.toLowerCase().includes(search.toLowerCase())
+            ).slice(0, 12);
+
+            const handleSelect = (o) => {
+                onChange(o);
+                setOpen(false);
+                setSearch('');
+            };
+
+            return (
+                <div className="cs-wrapper" ref={wrapRef}>
+                    <div className={`cs-display${open ? ' open' : ''}`} onClick={() => setOpen(o => !o)}>
+                        {icon && iconType === 'logo' && <img src={icon} className="cs-icon" alt="" onError={e => e.target.style.display='none'} />}
+                        {icon && iconType === 'flag' && (
+                             icon.startsWith('http')
+                                ? <img src={icon} style={{width:28,height:20,objectFit:'cover',borderRadius:3,flexShrink:0}} alt="" />
+                                : <span className="cs-flag">{icon}</span>
+                        )}
+                        {!icon && <span className="cs-icon-placeholder">{iconType === 'logo' ? '🏟️' : '🌍'}</span>}
+                        <span className={value ? 'cs-value' : 'cs-placeholder'}>{value || placeholder}</span>
+                        <span className={`cs-chevron${open ? ' open' : ''}`}>▾</span>
+                    </div>
+                    {open && (
+                        <div className="cs-dropdown">
+                            <div className="cs-search-wrap">
+                                <input className="cs-search" value={search} onChange={e => setSearch(e.target.value)}
+                                    placeholder="Caută..." autoFocus />
+                            </div>
+                            <div className="cs-options">
+                                {search && filtered.length === 0 && (
+                                    <div className="cs-option" onMouseDown={() => handleSelect({ name: search, logo: '', flag: '', code: '' })}>
+                                        <span className="cs-add">+ Adaugă manual: "{search}"</span>
+                                    </div>
+                                )}
+                                {filtered.map(o => (
+                                    <div key={o.name} className="cs-option" onMouseDown={() => handleSelect(o)}>
+                                        {iconType === 'logo' && <img src={o.logo} className="cs-option-logo" alt="" onError={e => e.target.style.display='none'} />}
+                                        {iconType === 'flag' && (
+    o.flag.startsWith('http')
+    ? <img src={o.flag} style={{width:26,height:18,objectFit:'cover',borderRadius:3}} alt="" />
+    : <span className="cs-option-flag">{o.flag}</span>
+)}
+                                        {o.name}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const SPECIAL_SKILLS = [
+            'Captaincy', 'Team spirit', 'Warrior mentality', 'Penalty specialist',
+            'Free kick taker', 'First touch shot', 'Long rage shot', 'Knuckle shot',
+            'No looking pass', 'Crossing', 'Trivela', 'Game changer', 'Incisive run',
+            'Goal hunter', 'Workman', 'Acrobatic playing', 'At the second floor',
+            'Artist', 'Box-to-box', 'Destroyer', 'Acrobatic clearance', 'Cat reflexes',
+            'Long clearance', 'The wall', 'Runs out', 'Aerial strength'
+        ];
+
+        const POSITIONS = ['GK', 'CB', 'LB', 'RB', 'DM', 'CM', 'LM', 'RM', 'AM', 'LF', 'RF', 'ST', 'CF'];
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('attacking');
+            const [loading, setLoading] = useState(false);
+            const [status, setStatus] = useState({ type: '', message: '' });
+
+            const [playerData, setPlayerData] = useState({
+                name: 'K. Mbappe', club: 'PSG', clubLogo: '', nationality: 'France', nationalityFlag: '🇫🇷', position: 'ST', rating: 97,
+                imageUrl: '', sofascoreId: '',
+                attackingAbilities: 95, ballControl: 93, dribbling: 98, shotPower: 86,
+                shotPrecision: 86, freeKickAbility: 86, penalty: 90, curl: 80, volley: 90, finishing: 94,
+                defendingAbilities: 57, tightPossession: 94, ballTackle: 60, heading: 80, slidingTackle: 64,
+                passPrecision: 85, loftedPass: 83, vision: 94, positioning: 95, balance: 94,
+                sprintSpeed: 99, speed: 97, physicalResistance: 86, stamina: 89,
+                diving: 92, handling: 88, gkKicking: 90, reflexes: 93, gkPositioning: 91,
+                clearance: 96,
+                weakFoot: 80, skillMoves: 5, injuryResistance: 5, actualForm: 3,
+                selectedSkills: ['Captaincy', 'Penalty specialist', 'First touch shot', 'Game changer', 'Incisive run', 'Goal hunter', 'Acrobatic playing'],
+                altPositions: { 'CF': 92, 'LF': 88 }
+            });
+            const [clubSuggestions, setClubSuggestions] = useState([]);
+            const [countrySuggestions, setCountrySuggestions] = useState([]);
+
+            // ── DB Player Comparator state ────────────────────────────
+            const [compOpen, setCompOpen] = useState(false);
+            const [compSearch, setCompSearch] = useState('');
+            const [compResult, setCompResult] = useState(null);
+            const [compCandidates, setCompCandidates] = useState([]);
+            const [compError, setCompError] = useState('');
+            // ─────────────────────────────────────────────────────────
+
+
+            const isGK = playerData.position === 'GK';
+
+            useEffect(() => {
+                if (isGK && activeTab === 'attacking') {
+                    setActiveTab('goalkeeping');
+                } else if (!isGK && activeTab === 'goalkeeping') {
+                    setActiveTab('attacking');
+                }
+            }, [playerData.position]);
+
+            const handleInputChange = (field, value) => setPlayerData(prev => ({ ...prev, [field]: value }));
+
+            // ── DB Comparator constants ───────────────────────────────
+            const COMP_STAT_LABELS = {
+                attackingAbilities: 'Attacking Abilities', ballControl: 'Ball Control',
+                dribbling: 'Dribbling', shotPower: 'Shot Power', shotPrecision: 'Shot Precision',
+                freeKickAbility: 'Free Kick Ability', penalty: 'Penalty', curl: 'Curl',
+                volley: 'Volley', finishing: 'Finishing', defendingAbilities: 'Defending Abilities',
+                tightPossession: 'Tight Possession', ballTackle: 'Ball Tackle', heading: 'Heading',
+                slidingTackle: 'Sliding Tackle', passPrecision: 'Pass Precision', loftedPass: 'Lofted Pass',
+                vision: 'Vision', positioning: 'Positioning', balance: 'Balance',
+                sprintSpeed: 'Sprint Speed', speed: 'Speed', physicalResistance: 'Physical Resistance',
+                stamina: 'Stamina', diving: 'Diving', handling: 'Handling', gkKicking: 'GK Kicking',
+                reflexes: 'Reflexes', gkPositioning: 'GK Positioning', clearance: 'Clearance',
+            };
+            const COMP_CATEGORIES = {
+                'Attacking': ['attackingAbilities','ballControl','dribbling','shotPower','shotPrecision','freeKickAbility','penalty','curl','volley','finishing'],
+                'Defending': ['defendingAbilities','tightPossession','ballTackle','heading','slidingTackle'],
+                'Playmaking': ['passPrecision','loftedPass','vision','positioning','balance'],
+                'Physical': ['sprintSpeed','speed','physicalResistance','stamina'],
+                'Goalkeeping': ['diving','handling','gkKicking','reflexes','gkPositioning','clearance'],
+            };
+
+            // ── Search in local footballPlayers2026 DB ────────────────
+            const searchLocalDB = () => {
+                if (!compSearch.trim()) return;
+                setCompError('');
+                setCompResult(null);
+                setCompCandidates([]);
+                const q = compSearch.trim().toLowerCase();
+                const matches = footballPlayers2026.filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    (p.club && p.club.toLowerCase().includes(q)) ||
+                    (p.nationality && p.nationality.toLowerCase().includes(q))
+                );
+                if (matches.length === 0) {
+                    setCompError(`Nu s-a găsit niciun jucător pentru "${compSearch.trim()}" în baza de date.`);
+                } else if (matches.length === 1) {
+                    applyDBPlayer(matches[0]);
+                } else {
+                    setCompCandidates(matches);
+                }
+            };
+
+            const applyDBPlayer = (player) => {
+                const statKeys = [
+                    'attackingAbilities','ballControl','dribbling','shotPower','shotPrecision',
+                    'freeKickAbility','penalty','curl','volley','finishing','defendingAbilities',
+                    'tightPossession','ballTackle','heading','slidingTackle','passPrecision',
+                    'loftedPass','vision','positioning','balance','sprintSpeed','speed',
+                    'physicalResistance','stamina','diving','handling','gkKicking','reflexes',
+                    'gkPositioning','clearance',
+                ];
+                const stats = {};
+                statKeys.forEach(k => { if (player[k] !== undefined) stats[k] = player[k]; });
+                setCompResult({
+                    playerName: player.name,
+                    overall: player.rating,
+                    position: player.position,
+                    club: player.club,
+                    nationality: player.nationality,
+                    age: player.age,
+                    weakFoot: player.weakFoot,
+                    skillMoves: player.skillMoves,
+                    injuryResistance: player.injuryResistance,
+                    actualForm: player.actualForm,
+                    source: 'DB 2026',
+                    stats,
+                });
+                setCompCandidates([]);
+            };
+
+            const applyCompStat = (key, value) => {
+                handleInputChange(key, Math.min(99, Math.max(50, Math.round(value))));
+            };
+
+            const applyAllCompStats = () => {
+                if (!compResult?.stats) return;
+                const currentIsGK = playerData.position === 'GK';
+                const skipKeys = currentIsGK
+                    ? ['attackingAbilities','dribbling','shotPrecision','freeKickAbility','penalty','curl','volley','finishing','defendingAbilities','tightPossession','ballTackle','slidingTackle','loftedPass','positioning']
+                    : ['diving','handling','gkKicking','reflexes','gkPositioning'];
+                Object.keys(compResult.stats).forEach(key => {
+                    if (key in playerData && !skipKeys.includes(key)) {
+                        handleInputChange(key, Math.min(99, Math.max(50, Math.round(compResult.stats[key]))));
+                    }
+                });
+                // Apply profile (non-stat) fields
+                if (compResult.playerName) handleInputChange('name', compResult.playerName);
+                if (compResult.club) handleInputChange('club', compResult.club);
+                if (compResult.nationality) handleInputChange('nationality', compResult.nationality);
+                if (compResult.position && POSITIONS.includes(compResult.position)) handleInputChange('position', compResult.position);
+                if (compResult.overall) handleInputChange('rating', Math.min(99, Math.max(50, compResult.overall)));
+                if (compResult.weakFoot !== undefined) handleInputChange('weakFoot', compResult.weakFoot);
+                if (compResult.skillMoves !== undefined) handleInputChange('skillMoves', compResult.skillMoves);
+                if (compResult.injuryResistance !== undefined) handleInputChange('injuryResistance', compResult.injuryResistance);
+                if (compResult.actualForm !== undefined) handleInputChange('actualForm', compResult.actualForm);
+            };
+            // ─────────────────────────────────────────────────────────
+
+            // CLUB SEARCH
+const findSimilarClubs = (input) => {
+    if (!input) return [];
+
+    return CLUBS.filter(c =>
+        c.name.toLowerCase().includes(input.toLowerCase())
+    ).slice(0, 8);
+};
+
+const handleClubChange = (value) => {
+    handleInputChange('club', value);
+
+    const matches = findSimilarClubs(value);
+    setClubSuggestions(matches);
+
+    const exact = CLUBS.find(c => c.name.toLowerCase() === value.toLowerCase());
+    handleInputChange('clubLogo', exact ? exact.logo : '');
+};
+// COUNTRY SEARCH
+const handleCountryChange = (value) => {
+    handleInputChange('nationality', value);
+
+    const matches = COUNTRIES.filter(c =>
+        c.name.toLowerCase().includes(value.toLowerCase())
+    ).slice(0, 8);
+
+    setCountrySuggestions(matches);
+
+    // auto-match exact
+    const exact = COUNTRIES.find(c => c.name.toLowerCase() === value.toLowerCase());
+    if (exact) handleInputChange('nationalityFlag', exact.flag);
+    else handleInputChange('nationalityFlag', '');
+};
+            const handleImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => handleInputChange('imageUrl', event.target.result);
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const [isDragOver, setIsDragOver] = React.useState(false);
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragOver(true);
+            };
+
+            const handleDragEnter = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragOver(true);
+            };
+
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragOver(false);
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsDragOver(false);
+                const file = e.dataTransfer.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => handleInputChange('imageUrl', event.target.result);
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            // IMPORT EXCEL FUNCTIONALITY
+            const handleExcelImport = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                setStatus({ type: 'loading', message: '📥 Import fișier Excel...' });
+
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const workbook = new ExcelJS.Workbook();
+                    await workbook.xlsx.load(arrayBuffer);
+                    
+                    const worksheet = workbook.getWorksheet('Sheet1') || workbook.worksheets[0];
+                    if (!worksheet) {
+                        throw new Error('Nu s-a găsit niciun worksheet în fișier');
+                    }
+
+                    const getCellValue = (cell) => {
+                        if (!cell || cell.value == null) return '';
+                        const v = cell.value;
+
+                        if (typeof v === 'string' || typeof v === 'number') {
+                            return String(v).trim();
+                        }
+
+                        if (v.richText) {
+                            return v.richText.map(t => t.text).join('').trim();
+                        }
+
+                        if (v.text) {
+                            return v.text.trim();
+                        }
+
+                        if (v.result) {
+                            return String(v.result).trim();
+                        }
+
+                         return '';
+                    };
+
+                    const getNumericValue = (cell) => {
+                        const val = getCellValue(cell);
+                        const num = parseInt(val);
+                        return isNaN(num) ? 50 : Math.max(50, Math.min(99, num));
+                    };
+
+                    const name = getCellValue(worksheet.getCell('B1')) || 'Unknown Player';
+                    const club = getCellValue(worksheet.getCell('B2')) || 'Unknown Club';
+                    let nationality = getCellValue(worksheet.getCell('B3'));
+                    
+                    nationality = nationality.replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, '').trim();
+                    if (!nationality) nationality = 'France';
+                    
+                    const position = getCellValue(worksheet.getCell('B4')) || 'ST';
+                    const rating = getNumericValue(worksheet.getCell('B5'));
+
+                    const isImportedGK = position === 'GK';
+
+                    let importedData = {
+                        name,
+                        club,
+                        nationality,
+                        position,
+                        rating,
+                        selectedSkills: []
+                    };
+
+                    if (isImportedGK) {
+                        importedData = {
+                            ...importedData,
+                            diving: getNumericValue(worksheet.getCell('B9')),
+                            handling: getNumericValue(worksheet.getCell('B10')),
+                            gkKicking: getNumericValue(worksheet.getCell('B11')),
+                            reflexes: getNumericValue(worksheet.getCell('B12')),
+                            gkPositioning: getNumericValue(worksheet.getCell('B13')),
+                            shotPower: getNumericValue(worksheet.getCell('E9')),
+                            shotPrecision: getNumericValue(worksheet.getCell('E10')),
+                            freeKickAbility: getNumericValue(worksheet.getCell('E11')),
+                            penalty: getNumericValue(worksheet.getCell('E12')),
+                            heading: getNumericValue(worksheet.getCell('E13')),
+                            passPrecision: getNumericValue(worksheet.getCell('H9')),
+                            ballControl: getNumericValue(worksheet.getCell('H10')),
+                            vision: getNumericValue(worksheet.getCell('H11')),
+                            balance: getNumericValue(worksheet.getCell('H12')),
+                            clearance: getNumericValue(worksheet.getCell('H13')),
+                            sprintSpeed: getNumericValue(worksheet.getCell('K9')),
+                            speed: getNumericValue(worksheet.getCell('K10')),
+                            physicalResistance: getNumericValue(worksheet.getCell('K11')),
+                            stamina: getNumericValue(worksheet.getCell('K12'))
+                        };
+                    } else {
+                        importedData = {
+                            ...importedData,
+                            attackingAbilities: getNumericValue(worksheet.getCell('B9')),
+                            ballControl: getNumericValue(worksheet.getCell('B10')),
+                            dribbling: getNumericValue(worksheet.getCell('B11')),
+                            shotPower: getNumericValue(worksheet.getCell('B12')),
+                            shotPrecision: getNumericValue(worksheet.getCell('B13')),
+                            freeKickAbility: getNumericValue(worksheet.getCell('B14')),
+                            penalty: getNumericValue(worksheet.getCell('B15')),
+                            curl: getNumericValue(worksheet.getCell('B16')),
+                            volley: getNumericValue(worksheet.getCell('B17')),
+                            finishing: getNumericValue(worksheet.getCell('B18')),
+                            defendingAbilities: getNumericValue(worksheet.getCell('E9')),
+                            tightPossession: getNumericValue(worksheet.getCell('E10')),
+                            ballTackle: getNumericValue(worksheet.getCell('E11')),
+                            heading: getNumericValue(worksheet.getCell('E12')),
+                            slidingTackle: getNumericValue(worksheet.getCell('E13')),
+                            passPrecision: getNumericValue(worksheet.getCell('H9')),
+                            loftedPass: getNumericValue(worksheet.getCell('H10')),
+                            vision: getNumericValue(worksheet.getCell('H11')),
+                            positioning: getNumericValue(worksheet.getCell('H12')),
+                            balance: getNumericValue(worksheet.getCell('H13')),
+                            sprintSpeed: getNumericValue(worksheet.getCell('K9')),
+                            speed: getNumericValue(worksheet.getCell('K10')),
+                            physicalResistance: getNumericValue(worksheet.getCell('K11')),
+                            stamina: getNumericValue(worksheet.getCell('K12'))
+                        };
+                    }
+
+                    importedData.weakFoot = getNumericValue(worksheet.getCell('B21'));
+                    
+                    const skillMovesStr = getCellValue(worksheet.getCell('B22'));
+                    importedData.skillMoves = (skillMovesStr.match(/⭐/g) || []).length || 5;
+                    
+                    const injuryResStr = getCellValue(worksheet.getCell('B23'));
+                    importedData.injuryResistance = (injuryResStr.match(/⭐/g) || []).length || 5;
+                    
+                    const formStr = getCellValue(worksheet.getCell('B24'));
+                    importedData.actualForm = (formStr.match(/➡️/g) || []).length || 3;
+
+                    let row = 28;
+                    const skills = [];
+
+                    while (row < 100) {
+                        const skillName = getCellValue(worksheet.getCell(`A${row}`));
+                        const starValue = getCellValue(worksheet.getCell(`B${row}`));
+
+                        if (!skillName) break;
+
+                        if (SPECIAL_SKILLS.includes(skillName) && starValue.includes('⭐')) {
+                            skills.push(skillName);
+                        }
+
+                        row++;
+                    }
+                    importedData.selectedSkills = skills;
+
+                    // ── Import position grid ───────────────────────────────
+                    const importedAltPositions = {};
+                    const POS_IMPORT_LAYOUT = [
+                        { pos: 'LF', r: 1, c: 1 }, { pos: 'ST', r: 1, c: 2 }, { pos: 'RF', r: 1, c: 3 },
+                        { pos: 'LM', r: 2, c: 1 }, { pos: 'AM', r: 2, c: 2 }, { pos: 'RM', r: 2, c: 3 },
+                        { pos: 'CM', r: 3, c: 2 },
+                        { pos: 'DM', r: 4, c: 2 },
+                        { pos: 'LB', r: 5, c: 1 }, { pos: 'CB', r: 5, c: 2 }, { pos: 'RB', r: 5, c: 3 },
+                        { pos: 'GK', r: 6, c: 2 },
+                    ];
+                    const posImportStartRow = 21;
+                    const posImportStartCol = 11;
+                    POS_IMPORT_LAYOUT.forEach(({ pos, r, c }) => {
+                        try {
+                            const cellVal = getCellValue(worksheet.getRow(posImportStartRow + r - 1).getCell(posImportStartCol + c - 1));
+                            if (!cellVal) return;
+                            const match = cellVal.match(/^([A-Z]+)\((\d+)\)$/);
+                            if (match && match[1] !== position) {
+                                importedAltPositions[match[1]] = parseInt(match[2]);
+                            }
+                        } catch(e) {}
+                    });
+                    importedData.altPositions = importedAltPositions;
+                    // ──────────────────────────────────────────────────────
+
+                    let imageExtracted = false;
+                    if (worksheet.getImages && worksheet.getImages().length > 0) {
+                        try {
+                            const images = worksheet.getImages();
+                            if (images.length > 0) {
+                                const imageId = images[0].imageId;
+                                const image = workbook.getImage(imageId);
+                                if (image && image.buffer) {
+                                    const base64 = `data:image/${image.extension};base64,${image.buffer.toString('base64')}`;
+                                    importedData.imageUrl = base64;
+                                    imageExtracted = true;
+                                }
+                            }
+                        } catch (imgErr) {
+                            console.warn('Nu s-a putut extrage imaginea:', imgErr);
+                        }
+                    }
+
+                    setPlayerData(prev => ({ ...prev, ...importedData }));
+                    
+                    setStatus({
+                        type: 'success',
+                        message: `✅ Date importate cu succes! ${name} - ${position} (Rating: ${rating})${imageExtracted ? ' [cu imagine]' : ''}`
+                    });
+                    setTimeout(() => setStatus({ type: '', message: '' }), 5000);
+
+                } catch (error) {
+                    console.error('Eroare import:', error);
+                    setStatus({
+                        type: 'error',
+                        message: `❌ Eroare la import: ${error.message}`
+                    });
+                }
+            };
+
+            const fetchJsonViaProxy = async (targetUrl) => {
+                const proxies = [
+                    (u) => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+                    (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+                    (u) => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(u)}`,
+                ];
+                let lastErr = null;
+                for (const build of proxies) {
+                    const proxyUrl = build(targetUrl);
+                    try {
+                        const r = await fetch(proxyUrl, {
+                            headers: { 
+                                'Accept': 'application/json, text/plain, */*',
+                                'User-Agent': 'Mozilla/5.0'
+                            }
+                        });
+                        if (!r.ok) { 
+                            lastErr = new Error(`HTTP ${r.status}`); 
+                            continue; 
+                        }
+                        const text = await r.text();
+                        try {
+                            return JSON.parse(text);
+                        } catch {
+                            try {
+                                const wrapped = JSON.parse(text);
+                                if (wrapped && wrapped.contents) {
+                                    return JSON.parse(wrapped.contents);
+                                }
+                            } catch {}
+                            lastErr = new Error('JSON invalid');
+                            continue;
+                        }
+                    } catch (e) {
+                        lastErr = e;
+                        console.warn('Proxy JSON failed:', proxyUrl, e);
+                    }
+                }
+                throw lastErr || new Error('Toate proxy-urile au eșuat');
+            };
+
+            const fetchImageAsBase64 = async (imageUrl) => {
+                const proxies = [
+                    `https://corsproxy.io/?url=${encodeURIComponent(imageUrl)}`,
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(imageUrl)}`,
+                    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(imageUrl)}`,
+                    `https://images.weserv.nl/?url=${encodeURIComponent(imageUrl.replace(/^https?:\/\//, ''))}`,
+                ];
+                let lastErr = null;
+                for (const proxyUrl of proxies) {
+                    try {
+                        const response = await fetch(proxyUrl);
+                        if (!response.ok) { lastErr = new Error(`HTTP ${response.status}`); continue; }
+                        const blob = await response.blob();
+                        if (!blob || blob.size < 100) { lastErr = new Error('Blob gol'); continue; }
+                        return await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        });
+                    } catch (e) {
+                        lastErr = e;
+                        console.warn('Proxy image failed:', proxyUrl, e);
+                    }
+                }
+                throw lastErr || new Error('Toate proxy-urile au eșuat');
+            };
+
+            const buildSlug = (name) => {
+                return (name || '')
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .replace(/\./g, '')
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .trim()
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-');
+            };
+
+            const fetchImageById = async (id) => {
+                const cleanId = String(id || '').trim();
+                if (!cleanId || !/^\d+$/.test(cleanId)) {
+                    setStatus({ type: 'error', message: '❌ Introdu un ID Sofascore numeric valid (ex: 12994)' });
+                    return;
+                }
+                setStatus({ type: 'loading', message: `🔍 Descărcare imagine pentru ID ${cleanId}...` });
+                try {
+                    let realName = null;
+                    try {
+                        const detail = await fetchJsonViaProxy(`https://api.sofascore.com/api/v1/player/${cleanId}`);
+                        if (detail && detail.player && detail.player.name) {
+                            realName = detail.player.name;
+                            handleInputChange('name', realName);
+                        }
+                    } catch (e) { console.warn('Player detail fetch failed (continuăm cu imaginea):', e); }
+
+                    const imageUrl = `https://img.sofascore.com/api/v1/player/${cleanId}/image`;
+                    const base64 = await fetchImageAsBase64(imageUrl);
+                    handleInputChange('imageUrl', base64);
+                    const slug = realName ? buildSlug(realName) : 'player';
+                    setStatus({
+                        type: 'success',
+                        message: `✅ Imagine descărcată (ID: ${cleanId})${realName ? ` - ${realName}` : ''} | URL: sofascore.com/football/player/${slug}/${cleanId}`
+                    });
+                    setTimeout(() => setStatus({ type: '', message: '' }), 6000);
+                } catch (err) {
+                    console.error(err);
+                    setStatus({ type: 'error', message: `❌ Nu s-a putut descărca imaginea: ${err.message}. Încearcă alt proxy sau verifică ID-ul.` });
+                }
+            };
+
+            const searchSofascore = async () => {
+                const name = (playerData.name || '').trim();
+                if (!name) {
+                    setStatus({ type: 'error', message: '❌ Introdu numele jucătorului' });
+                    return;
+                }
+                setStatus({ type: 'loading', message: `🔍 Căutare "${name}" pe Sofascore...` });
+                try {
+                    const searchEndpoints = [
+                        `https://www.sofascore.com/api/v1/search/all?q=${encodeURIComponent(name)}`,
+                        `https://api.sofascore.com/api/v1/search/all?q=${encodeURIComponent(name)}`,
+                    ];
+
+                    let data = null;
+                    let lastErr = null;
+                    
+                    for (const ep of searchEndpoints) {
+                        try {
+                            console.log('Încercare endpoint:', ep);
+                            data = await fetchJsonViaProxy(ep);
+                            console.log('Răspuns:', data);
+                            if (data && data.results && data.results.length > 0) {
+                                break;
+                            }
+                        } catch (e) { 
+                            lastErr = e; 
+                            console.warn('Search endpoint failed:', ep, e); 
+                        }
+                    }
+
+                    if (!data || !data.results || data.results.length === 0) {
+                        throw new Error('Nu s-au găsit rezultate pentru căutare');
+                    }
+
+                    let player = null;
+                    for (const result of data.results) {
+                        if (result.type === 'player' && result.entity) {
+                            player = result.entity;
+                            break;
+                        }
+                    }
+
+                    if (!player || !player.id) {
+                        setStatus({ type: 'error', message: `❌ Nu s-a găsit niciun jucător cu numele "${name}". Încearcă să introduci ID-ul manual.` });
+                        return;
+                    }
+
+                    const id = player.id;
+                    const realName = player.name || name;
+                    const slug = buildSlug(realName);
+                    
+                    handleInputChange('sofascoreId', String(id));
+                    handleInputChange('name', realName);
+
+                    setStatus({ type: 'loading', message: `✅ Găsit: ${realName} (ID: ${id}) - descărcare imagine...` });
+                    
+                    const imageUrl = `https://img.sofascore.com/api/v1/player/${id}/image`;
+                    const base64 = await fetchImageAsBase64(imageUrl);
+                    handleInputChange('imageUrl', base64);
+
+                    setStatus({
+                        type: 'success',
+                        message: `✅ ${realName} găsit! ID: ${id} | URL: sofascore.com/football/player/${slug}/${id}`
+                    });
+                    setTimeout(() => setStatus({ type: '', message: '' }), 6000);
+                } catch (err) {
+                    console.error('Eroare căutare:', err);
+                    setStatus({ 
+                        type: 'error', 
+                        message: `❌ Eroare căutare: ${err.message}. Încearcă să introduci ID-ul jucătorului direct în câmpul de mai jos.` 
+                    });
+                }
+            };
+
+            const toggleSkill = (skill) => {
+                setPlayerData(prev => ({
+                    ...prev,
+                    selectedSkills: prev.selectedSkills.includes(skill)
+                        ? prev.selectedSkills.filter(s => s !== skill)
+                        : [...prev.selectedSkills, skill]
+                }));
+            };
+
+            // ── Rating colour helpers ──────────────────────────────────
+            const getStatColor = (v) => {
+                if (v >= 90) return '#1bc8b8';   // teal
+                if (v >= 80) return '#a2e040';   // lime-green
+                if (v >= 70) return '#f0a500';   // amber/orange
+                return '#e03535';                // red
+            };
+
+            const getCategoryAvg = (keys) => {
+                const vals = keys.map(k => playerData[k] || 50);
+                return Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
+            };
+
+            // Reusable single-stat badge row with stepper
+            const StatRow = ({ statKey, label }) => {
+                const val = playerData[statKey] || 50;
+                const color = getStatColor(val);
+                const change = (delta) => {
+                    const next = Math.min(99, Math.max(50, val + delta));
+                    handleInputChange(statKey, next);
+                };
+                const onBlur = (e) => {
+                    const n = parseInt(e.target.value);
+                    const clamped = isNaN(n) ? 50 : Math.min(99, Math.max(50, n));
+                    handleInputChange(statKey, clamped);
+                };
+                return (
+                    <div className="stat-row">
+                        <div className="stat-num-badge" style={{background: color}}>{val}</div>
+                        <span className="stat-name">{label}</span>
+                        <div className="stat-stepper">
+                            <button className="step-btn" onClick={() => change(-1)}>−</button>
+                            <input className="stat-val-input" type="number" min="50" max="99"
+                                   key={val}
+                                   defaultValue={val}
+                                   onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); }}
+                                   onBlur={onBlur} />
+                            <button className="step-btn" onClick={() => change(1)}>+</button>
+                        </div>
+                    </div>
+                );
+            };
+
+            // Category header with circular SVG progress ring + progress bar
+            const CatHeader = ({ emoji, title, statKeys, onAuto }) => {
+                const avg = getCategoryAvg(statKeys);
+                const color = getStatColor(avg);
+                const barPct = ((avg - 50) / 49) * 100;
+
+                // SVG ring parameters
+                const radius = 24;
+                const strokeW = 5;
+                const size = (radius + strokeW + 2) * 2;
+                const cx = size / 2;
+                const cy = size / 2;
+                const circumference = 2 * Math.PI * radius;
+                // Map avg 50–99 → 0–100% arc fill
+                const fillRatio = (avg - 50) / 49;
+                const filledDash = circumference * fillRatio;
+                const gapDash = circumference - filledDash;
+                // Start at top (12 o'clock): offset by -circumference/4
+                const dashOffset = circumference / 4;
+
+                // Subtle background ring color (dim version of main color)
+                const trackColor = 'rgba(255,255,255,0.08)';
+
+                return (
+                    <div className="category-header" style={{flexDirection:'column', alignItems:'stretch'}}>
+                        <div className="cat-header-top">
+                            {/* Circular progress ring replacing the square badge */}
+                            <svg
+                                width={size} height={size}
+                                style={{
+                                    flexShrink: 0,
+                                    filter: `drop-shadow(0 0 8px ${color}99)`,
+                                    transition: 'filter 0.4s ease',
+                                }}
+                            >
+                                {/* Dark background fill */}
+                                <circle cx={cx} cy={cy} r={radius} fill="#0f1419" />
+                                {/* Track ring */}
+                                <circle
+                                    cx={cx} cy={cy} r={radius}
+                                    fill="none"
+                                    stroke={trackColor}
+                                    strokeWidth={strokeW}
+                                />
+                                {/* Progress arc */}
+                                <circle
+                                    cx={cx} cy={cy} r={radius}
+                                    fill="none"
+                                    stroke={color}
+                                    strokeWidth={strokeW}
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${filledDash} ${gapDash}`}
+                                    strokeDashoffset={dashOffset}
+                                    style={{
+                                        transition: 'stroke-dasharray 0.45s ease, stroke 0.4s ease',
+                                    }}
+                                />
+                                {/* Number label */}
+                                <text
+                                    x={cx} y={cy}
+                                    textAnchor="middle"
+                                    dominantBaseline="central"
+                                    fill={color}
+                                    fontSize="14"
+                                    fontWeight="900"
+                                    fontFamily="Outfit, sans-serif"
+                                    style={{ transition: 'fill 0.4s ease' }}
+                                >{avg}</text>
+                            </svg>
+
+                            <span className="cat-header-title">{emoji} {title}</span>
+                            <button className="auto-generate-btn btn-secondary" onClick={onAuto}>🎲 Auto</button>
+                        </div>
+                        <div className="cat-bar-wrap">
+                            <div className="cat-bar-fill" style={{width: `${barPct}%`, background: color}} />
+                        </div>
+                    </div>
+                );
+            };
+            // ─────────────────────────────────────────────────────────────
+
+            // ─────────────────────────────────────────────────────────────
+
+            // Position field grid component
+            const POS_CELLS = [
+                { pos: 'LF', gridRow: '1',        gridColumn: '1' },
+                { pos: 'ST', gridRow: '1',        gridColumn: '2' },
+                { pos: 'RF', gridRow: '1',        gridColumn: '3' },
+                { pos: 'LM', gridRow: '2 / span 2', gridColumn: '1' },
+                { pos: 'AM', gridRow: '2',        gridColumn: '2' },
+                { pos: 'RM', gridRow: '2 / span 2', gridColumn: '3' },
+                { pos: 'CM', gridRow: '3',        gridColumn: '2' },
+                { pos: 'DM', gridRow: '4',        gridColumn: '2' },
+                { pos: 'LB', gridRow: '5',        gridColumn: '1' },
+                { pos: 'CB', gridRow: '5',        gridColumn: '2' },
+                { pos: 'RB', gridRow: '5',        gridColumn: '3' },
+                { pos: 'GK', gridRow: '6',        gridColumn: '2' },
+            ];
+
+            const PositionGrid = () => {
+                const primaryPos = playerData.position;
+                const altPos = playerData.altPositions || {};
+
+                const togglePos = (pos) => {
+                    if (pos === primaryPos) return;
+                    const next = { ...altPos };
+                    if (next[pos] !== undefined) {
+                        delete next[pos];
+                    } else {
+                        next[pos] = Math.max(50, Math.min(99, (playerData.rating || 75) - 5));
+                    }
+                    handleInputChange('altPositions', next);
+                };
+
+                const setAltRating = (pos, raw) => {
+                    const n = parseInt(raw);
+                    const clamped = isNaN(n) ? 50 : Math.min(99, Math.max(50, n));
+                    const next = { ...altPos, [pos]: clamped };
+                    handleInputChange('altPositions', next);
+                };
+
+                        return (
+                            <div>
+                                <div className="pos-field-wrap">
+                                <div className="pos-field">
+                                    {POS_CELLS.map(({ pos, gridRow, gridColumn }) => {
+                                        const isPrimary = pos === primaryPos;
+                                        const isAlt     = altPos[pos] !== undefined;
+                                        const cellRating = isPrimary ? playerData.rating : (isAlt ? altPos[pos] : null);
+                                        const cellColor  = cellRating !== null ? getStatColor(cellRating) : null;
+                                        return (
+                                            <div key={pos}
+                                                 className={`pos-cell${isPrimary ? ' primary' : ''}${isAlt ? ' active' : ''}`}
+                                                 style={{ gridRow, gridColumn, ...(cellColor ? { background: cellColor } : {}) }}
+                                                 onClick={() => togglePos(pos)}>
+                                                <span className="pos-cell-name">{pos}</span>
+                                                {isPrimary && (
+                                                    <span className="pos-cell-rating">({playerData.rating})</span>
+                                                )}
+                                                {isAlt && (
+                                                    <input
+                                                        key={altPos[pos]}
+                                                        className="pos-alt-input"
+                                                        type="number" min="50" max="99"
+                                                        defaultValue={altPos[pos]}
+                                                        onClick={e => e.stopPropagation()}
+                                                        onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); }}
+                                                        onBlur={e => setAltRating(pos, e.target.value)}
+                                                    />
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                </div>
+                                <p className="pos-hint">Click pentru a activa / dezactiva o poziție alternativă</p>
+                            </div>
+                        );
+            };
+
+            const autoGenerateStats = (category) => {
+                const baseRating = playerData.rating;
+                const variation = 10;
+                const generateStat = () => Math.min(99, Math.max(50, baseRating + Math.floor(Math.random() * variation * 2) - variation));
+                
+                const updates = {
+                    goalkeeping: { 
+                        diving: generateStat(), 
+                        handling: generateStat(), 
+                        gkKicking: generateStat(), 
+                        reflexes: generateStat(), 
+                        gkPositioning: generateStat() 
+                    },
+                    attacking: { 
+                        attackingAbilities: generateStat(), 
+                        ballControl: generateStat(), 
+                        dribbling: generateStat(), 
+                        shotPower: generateStat(), 
+                        shotPrecision: generateStat(), 
+                        freeKickAbility: generateStat(), 
+                        penalty: generateStat(), 
+                        curl: generateStat(), 
+                        volley: generateStat(), 
+                        finishing: generateStat() 
+                    },
+                    defending: { 
+                        defendingAbilities: generateStat(), 
+                        tightPossession: generateStat(), 
+                        ballTackle: generateStat(), 
+                        heading: generateStat(), 
+                        slidingTackle: generateStat() 
+                    },
+                    playmaking: { 
+                        passPrecision: generateStat(), 
+                        loftedPass: generateStat(), 
+                        vision: generateStat(), 
+                        positioning: generateStat(), 
+                        balance: generateStat(),
+                        clearance: generateStat(),
+                        ballControl: generateStat()
+                    },
+                    physical: { 
+                        sprintSpeed: generateStat(), 
+                        speed: generateStat(), 
+                        physicalResistance: generateStat(), 
+                        stamina: generateStat() 
+                    }
+                };
+                
+                setPlayerData(prev => ({ ...prev, ...updates[category] }));
+                setStatus({ type: 'success', message: `✅ Statistici ${category} generate!` });
+                setTimeout(() => setStatus({ type: '', message: '' }), 3000);
+            };
+
+            const generateExcel = async () => {
+                setLoading(true);
+                setStatus({ type: 'loading', message: 'Generare fișier Excel...' });
+                try {
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('Sheet1');
+                    const widths = [25,15,5,25,15,5,25,15,5,25,15,13,13,12,12,12];
+                    widths.forEach((w,i) => worksheet.getColumn(i+1).width = w);
+
+                    const country = COUNTRIES.find(c => c.name === playerData.nationality);
+                    const nationalityDisplay = country ? `${country.flag} ${country.name}` : playerData.nationality;
+
+                    worksheet.getCell('A1').value = 'Name'; worksheet.getCell('B1').value = playerData.name;
+                    worksheet.getCell('A2').value = 'Club'; worksheet.getCell('B2').value = playerData.club;
+                    worksheet.getCell('A3').value = 'Nationality'; worksheet.getCell('B3').value = nationalityDisplay;
+                    worksheet.getCell('A4').value = 'Position'; worksheet.getCell('B4').value = playerData.position;
+                    worksheet.getCell('A5').value = 'Rating'; worksheet.getCell('B5').value = playerData.rating;
+
+                    const set = (a,v) => worksheet.getCell(a).value = v;
+
+                    // Helper: set stat value with colored font (matching HTML getStatColor badge)
+                    const setStat = (addr, value) => {
+                        const cell = worksheet.getCell(addr);
+                        cell.value = value;
+                        const hex = value >= 90 ? '1BC8B8' : value >= 80 ? 'A2E040' : value >= 70 ? 'F0A500' : 'E03535';
+                        cell.font = { bold: true, color: { argb: 'FF' + hex }, size: 11 };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    };
+
+                    if (isGK) {
+                        set('A8','Goalkeeping');
+                        set('D8','General abilities');
+                        set('G8','Playmaking');
+                        set('J8','Physical Form');
+
+                        set('A9','Diving'); setStat('B9',playerData.diving);
+                        set('A10','Handling'); setStat('B10',playerData.handling);
+                        set('A11','Kicking'); setStat('B11',playerData.gkKicking);
+                        set('A12','Reflexes'); setStat('B12',playerData.reflexes);
+                        set('A13','Positioning'); setStat('B13',playerData.gkPositioning);
+
+                        set('D9','Shot power'); setStat('E9',playerData.shotPower);
+                        set('D10','Shot precision'); setStat('E10',playerData.shotPrecision);
+                        set('D11','Free kick ability'); setStat('E11',playerData.freeKickAbility);
+                        set('D12','Penalty'); setStat('E12',playerData.penalty);
+                        set('D13','Heading'); setStat('E13',playerData.heading);
+
+                        set('G9','Pass precision'); setStat('H9',playerData.passPrecision);
+                        set('G10','Ball control'); setStat('H10',playerData.ballControl);
+                        set('G11','Vision'); setStat('H11',playerData.vision);
+                        set('G12','Balance (jumping)'); setStat('H12',playerData.balance);
+                        set('G13','Clearance'); setStat('H13',playerData.clearance);
+
+                        set('J9','Sprint speed'); setStat('K9',playerData.sprintSpeed);
+                        set('J10','Speed'); setStat('K10',playerData.speed);
+                        set('J11','Physical resistance'); setStat('K11',playerData.physicalResistance);
+                        set('J12','Stamina'); setStat('K12',playerData.stamina);
+
+                    } else {
+                        set('A8','Attacking');
+                        set('D8','Defending');
+                        set('G8','Playmaking');
+                        set('J8','Physical Form');
+
+                        set('A9','Attacking abilities'); setStat('B9',playerData.attackingAbilities);
+                        set('D9','Defending abilities'); setStat('E9',playerData.defendingAbilities);
+                        set('G9','Pass precision'); setStat('H9',playerData.passPrecision);
+                        set('J9','Sprint speed'); setStat('K9',playerData.sprintSpeed);
+                        set('A10','Ball control'); setStat('B10',playerData.ballControl);
+                        set('D10','Tight possession'); setStat('E10',playerData.tightPossession);
+                        set('G10','Lofted pass'); setStat('H10',playerData.loftedPass);
+                        set('J10','Speed'); setStat('K10',playerData.speed);
+                        set('A11','Dribbling'); setStat('B11',playerData.dribbling);
+                        set('D11','Ball tackle'); setStat('E11',playerData.ballTackle);
+                        set('G11','Vision'); setStat('H11',playerData.vision);
+                        set('J11','Physical resistance'); setStat('K11',playerData.physicalResistance);
+                        set('A12','Shot power'); setStat('B12',playerData.shotPower);
+                        set('D12','Heading'); setStat('E12',playerData.heading);
+                        set('G12','Positioning'); setStat('H12',playerData.positioning);
+                        set('J12','Stamina'); setStat('K12',playerData.stamina);
+                        set('A13','Shot precision'); setStat('B13',playerData.shotPrecision);
+                        set('D13','Sliding tackle'); setStat('E13',playerData.slidingTackle);
+                        set('G13','Balance'); setStat('H13',playerData.balance);
+                        set('A14','Free kick ability'); setStat('B14',playerData.freeKickAbility);
+                        set('A15','Penalty'); setStat('B15',playerData.penalty);
+                        set('A16','Curl'); setStat('B16',playerData.curl);
+                        set('A17','Volley'); setStat('B17',playerData.volley);
+                        set('A18','Finishing'); setStat('B18',playerData.finishing);
+                    }
+
+                    set('A20','Other abilities:');
+                    set('A21','Weak foot'); set('B21',playerData.weakFoot);
+                    set('A22','Skill moves'); set('B22','⭐'.repeat(playerData.skillMoves));
+                    set('A23','Injury resistance'); set('B23','⭐'.repeat(playerData.injuryResistance));
+                    set('A24','Actual form'); set('B24','➡️'.repeat(playerData.actualForm));
+
+                    let r = 27;
+                    worksheet.getCell(`A${r}`).value = 'Special Skills:';
+                    r++;
+                    playerData.selectedSkills.forEach(skill => {
+                        worksheet.getCell(`A${r}`).value = skill;
+                        worksheet.getCell(`B${r}`).value = '⭐';
+                        r++;
+                    });
+
+                    if (playerData.imageUrl) {
+                        try {
+                            const base64Data = playerData.imageUrl.split(',')[1];
+                            const imageId = workbook.addImage({ base64: base64Data, extension: 'png' });
+                            worksheet.addImage(imageId, { tl: { col: 3, row: 0 }, ext: { width: 100, height: 100 } });
+                        } catch (e) { console.warn('Image add failed:', e); }
+                    }
+
+                    // ── Position Grid ──────────────────────────────────────
+                    // Layout matches HTML: 3 cols x 6 rows, same colors as pos-cell
+                    const POS_LAYOUT = [
+                        { pos: 'LF', r: 1, c: 1 },
+                        { pos: 'ST', r: 1, c: 2 },
+                        { pos: 'RF', r: 1, c: 3 },
+                        { pos: 'LM', r: 2, c: 1 },
+                        { pos: 'AM', r: 2, c: 2 },
+                        { pos: 'RM', r: 2, c: 3 },
+                        { pos: 'CM', r: 3, c: 2 },
+                        { pos: 'DM', r: 4, c: 2 },
+                        { pos: 'LB', r: 5, c: 1 },
+                        { pos: 'CB', r: 5, c: 2 },
+                        { pos: 'RB', r: 5, c: 3 },
+                        { pos: 'GK', r: 6, c: 2 },
+                    ];
+
+                    const altPos = playerData.altPositions || {};
+                    const posGridStartRow = 21;   // alongside "Other abilities" section
+                    const posGridStartCol = 11;  // column N
+
+                    // Header "POSITIONS"
+                    const headerCell = worksheet.getRow(posGridStartRow - 1).getCell(posGridStartCol);
+                    headerCell.value = 'POSITIONS';
+                    headerCell.font = { bold: true, color: { argb: 'FFFFD700' }, size: 11 };
+                    headerCell.alignment = { horizontal: 'center' };
+                    try { worksheet.mergeCells(posGridStartRow - 1, posGridStartCol, posGridStartRow - 1, posGridStartCol + 2); } catch(e) {}
+
+                    // Paint all 3x6 cells with dark base first
+                    for (let r = 0; r < 6; r++) {
+                        for (let c = 0; c < 3; c++) {
+                            const cell = worksheet.getRow(posGridStartRow + r).getCell(posGridStartCol + c);
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F2236' } };
+                            cell.border = {
+                                top:    { style: 'thin', color: { argb: 'FF1a3050' } },
+                                bottom: { style: 'thin', color: { argb: 'FF1a3050' } },
+                                left:   { style: 'thin', color: { argb: 'FF1a3050' } },
+                                right:  { style: 'thin', color: { argb: 'FF1a3050' } },
+                            };
+                            worksheet.getRow(posGridStartRow + r).height = 22;
+                        }
+                    }
+
+                    // Paint each known position cell
+                    POS_LAYOUT.forEach(({ pos, r, c }) => {
+                        const rowIdx = posGridStartRow + r - 1;
+                        const colIdx = posGridStartCol + c - 1;
+                        const cell = worksheet.getRow(rowIdx).getCell(colIdx);
+
+                        const isPrimary = pos === playerData.position;
+                        const isAlt     = altPos[pos] !== undefined;
+
+                        let bgHex    = '0F2236';
+                        let fontHex  = 'FF556E82';
+                        let isBold   = false;
+
+                        const excelStatColor = (v) => v >= 90 ? '1BC8B8' : v >= 80 ? 'A2E040' : v >= 70 ? 'F0A500' : 'E03535';
+
+                        if (isPrimary) { bgHex = excelStatColor(playerData.rating); fontHex = 'FF000000'; isBold = true; }
+                        else if (isAlt){ bgHex = excelStatColor(altPos[pos] || 50); fontHex = 'FF000000'; isBold = true; }
+
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF' + bgHex } };
+                        cell.font = { bold: isBold, color: { argb: fontHex }, size: 9 };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+                        cell.border = {
+                            top:    { style: 'thin', color: { argb: 'FF1a3050' } },
+                            bottom: { style: 'thin', color: { argb: 'FF1a3050' } },
+                            left:   { style: 'thin', color: { argb: 'FF1a3050' } },
+                            right:  { style: 'thin', color: { argb: 'FF1a3050' } },
+                        };
+
+                        let display = pos;
+                        if (isPrimary) display = `${pos}(${playerData.rating})`;
+                        else if (isAlt) display = `${pos}(${altPos[pos]})`;
+
+                        cell.value = display;
+                    });
+                    // ───────────────────────────────────────────────────────
+
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${playerData.name.replace(/\s+/g, '_')}_card.xlsx`;
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+
+                    setStatus({ type: 'success', message: '✅ Fișier Excel generat cu imagine!' });
+                    setLoading(false);
+                    setTimeout(() => setStatus({ type: '', message: '' }), 5000);
+                } catch (error) {
+                    console.error(error);
+                    setStatus({ type: 'error', message: '❌ Eroare la generare: ' + error.message });
+                    setLoading(false);
+                }
+            };
+
+            // ─── PNG CARD GENERATOR ────────────────────────────────────────
+            const generatePNG = async () => {
+                setLoading(true);
+                setStatus({ type: 'loading', message: '🖼️ Generare card PNG...' });
+                try {
+                    await document.fonts.ready;
+
+                    const W = 1160, H = 750, SC = 2;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = W * SC; canvas.height = H * SC;
+                    const ctx = canvas.getContext('2d');
+                    ctx.scale(SC, SC);
+
+                    // ── Helpers ──────────────────────────────────────────────
+                    const sColor = v => v>=90?'#1bc8b8':v>=80?'#a2e040':v>=70?'#f0a500':'#e03535';
+                    const cAvg  = keys => Math.round(keys.map(k=>playerData[k]||50).reduce((a,b)=>a+b,0)/keys.length);
+
+                    const rr = (x,y,w,h,rad,fill,stroke,sw=1) => {
+                        ctx.beginPath();
+                        if(ctx.roundRect){ ctx.roundRect(x,y,w,h,rad); }
+                        else {
+                            ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
+                            ctx.lineTo(x+w,y+h-rad); ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
+                            ctx.lineTo(x+rad,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-rad);
+                            ctx.lineTo(x,y+rad); ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath();
+                        }
+                        if(fill){ ctx.fillStyle=fill; ctx.fill(); }
+                        if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=sw; ctx.stroke(); }
+                    };
+
+                    const tx = (text,x,y,color='#fff',size=14,weight='400',align='left') => {
+                        ctx.save();
+                        ctx.fillStyle=color; ctx.font=`${weight} ${size}px "Outfit",sans-serif`;
+                        ctx.textAlign=align; ctx.textBaseline='middle';
+                        ctx.fillText(String(text),x,y);
+                        ctx.restore();
+                    };
+
+                    const mw = (text,size,weight='400') => {
+                        ctx.font=`${weight} ${size}px "Outfit",sans-serif`;
+                        return ctx.measureText(String(text)).width;
+                    };
+
+                    const dc = (cx,cy,val,r=28) => {
+                        const color=sColor(val), ratio=Math.max(0,(val-50)/49);
+                        ctx.save(); ctx.shadowColor=color; ctx.shadowBlur=12;
+                        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#0a1020'; ctx.fill();
+                        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=5; ctx.stroke();
+                        ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+ratio*Math.PI*2); ctx.strokeStyle=color; ctx.lineWidth=5; ctx.lineCap='round'; ctx.stroke();
+                        ctx.restore();
+                        tx(val,cx,cy,color,16,'900','center');
+                    };
+
+                    // ── Background ───────────────────────────────────────────
+                    const bgGrad = ctx.createLinearGradient(0,0,W,H);
+                    bgGrad.addColorStop(0,'#161739'); bgGrad.addColorStop(0.45,'#0d1133'); bgGrad.addColorStop(1,'#1a1252');
+                    ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+
+                    // Tiger stripes
+                    ctx.save();
+                    for(let i=-H; i<W+H; i+=42){
+                        ctx.globalAlpha=0.11; ctx.fillStyle='#00001a';
+                        ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+20,0); ctx.lineTo(i+20+H,H); ctx.lineTo(i+H,H); ctx.closePath(); ctx.fill();
+                    }
+                    ctx.globalAlpha=1; ctx.restore();
+
+                    // ── Top info block ───────────────────────────────────────
+                    // Pre-load club logo if available
+                    let clubLogoImg = null;
+                    if (playerData.clubLogo) {
+                        clubLogoImg = new Image(); clubLogoImg.crossOrigin='anonymous';
+                        await new Promise(res => { clubLogoImg.onload=res; clubLogoImg.onerror=()=>{clubLogoImg=null;res();}; clubLogoImg.src=playerData.clubLogo; });
+                    }
+
+                    const drawInfoRow = (label, value, vc, ls, lw, vw, y, icon) => {
+                        const iconW = icon ? 20 : 0;
+                        const iconGap = icon ? 5 : 0;
+                        const lW2 = mw(label, ls, lw);
+                        const vW2 = mw(String(value), ls, vw);
+                        const totalW = lW2 + iconW + iconGap + vW2;
+                        const sx = W/2 - totalW/2;
+                        ctx.save();
+                        ctx.textBaseline='middle'; ctx.textAlign='left';
+                        ctx.font=`${lw} ${ls}px "Outfit",sans-serif`; ctx.fillStyle='#9aaabb'; ctx.fillText(label, sx, y);
+                        let curX = sx + lW2;
+                        if (icon) {
+                            if (icon.type === 'img' && icon.img) {
+                                const iSize = 16;
+                                ctx.drawImage(icon.img, curX, y - iSize/2, iSize, iSize);
+                                curX += iSize + iconGap;
+                            } else if (icon.type === 'emoji') {
+                                ctx.font = `${ls}px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif`;
+                                ctx.fillText(icon.char, curX, y);
+                                curX += iconW + iconGap;
+                            }
+                        }
+                        ctx.font=`${vw} ${ls}px "Outfit",sans-serif`; ctx.fillStyle=vc; ctx.fillText(String(value), curX, y);
+                        ctx.restore();
+                    };
+
+                    const flagEmoji = playerData.nationalityFlag && !playerData.nationalityFlag.startsWith('http') ? playerData.nationalityFlag : '';
+
+                    const infoRows = [
+                        { label:'Name: ',        value:playerData.name,        vc:'#ffffff', ls:17, lw:'600', vw:'700', icon: null },
+                        { label:'Club: ',        value:playerData.club,        vc:'#a2e040', ls:14, lw:'500', vw:'700', icon: clubLogoImg ? {type:'img', img:clubLogoImg} : null },
+                        { label:'Nationality: ', value:playerData.nationality, vc:'#a2e040', ls:14, lw:'500', vw:'700', icon: flagEmoji ? {type:'emoji', char:flagEmoji} : null },
+                        { label:'Position:  ',   value:playerData.position,    vc:'#ffffff', ls:14, lw:'500', vw:'700', icon: null },
+                        { label:'Rating: ',      value:playerData.rating,      vc:sColor(playerData.rating), ls:14, lw:'500', vw:'700', icon: null },
+                    ];
+
+                    infoRows.forEach(({label,value,vc,ls,lw,vw,icon},i) => {
+                        const y = 14 + i*18;
+                        drawInfoRow(label, value, vc, ls, lw, vw, y, icon);
+                    });
+
+                    // ── Player photo ─────────────────────────────────────────
+                    const PX=20, PY=105, PW=195, PH=248;
+                    rr(PX,PY,PW,PH,8,'rgba(0,0,0,0.4)','rgba(255,255,255,0.25)',2);
+
+                    if(playerData.imageUrl){
+                        const img=new Image(); img.crossOrigin='anonymous';
+                        await new Promise(res=>{ img.onload=res; img.onerror=res; img.src=playerData.imageUrl; });
+                        ctx.save();
+                        ctx.beginPath();
+                        if(ctx.roundRect) ctx.roundRect(PX+1,PY+1,PW-2,PH-2,7); else ctx.rect(PX+1,PY+1,PW-2,PH-2);
+                        ctx.clip(); ctx.drawImage(img,PX+1,PY+1,PW-2,PH-2); ctx.restore();
+                    } else {
+                        tx('⚽',PX+PW/2,PY+PH/2,'#ffffff',52,'400','center');
+                    }
+
+
+
+                    // ── Other abilities ──────────────────────────────────────
+                    const OAY = PY+PH+16;
+                    tx('Other abilities:',PX,OAY,'#ffffff',13,'700');
+
+                    // Weak foot circle
+                    const wf=playerData.weakFoot||50, wfC=sColor(wf), wfR=16;
+                    const wfCX=PX+158, wfCY=OAY+28;
+                    tx('Weak foot',PX,wfCY,'#aabbcc',12);
+                    ctx.save(); ctx.shadowColor=wfC; ctx.shadowBlur=8;
+                    ctx.beginPath(); ctx.arc(wfCX,wfCY,wfR,0,Math.PI*2); ctx.fillStyle='#0a1020'; ctx.fill();
+                    ctx.beginPath(); ctx.arc(wfCX,wfCY,wfR,0,Math.PI*2); ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=3.5; ctx.stroke();
+                    const wfRatio=Math.max(0,(wf-50)/49);
+                    ctx.beginPath(); ctx.arc(wfCX,wfCY,wfR,-Math.PI/2,-Math.PI/2+wfRatio*Math.PI*2); ctx.strokeStyle=wfC; ctx.lineWidth=3.5; ctx.lineCap='round'; ctx.stroke();
+                    ctx.restore();
+                    tx(wf,wfCX,wfCY,wfC,10,'700','center');
+
+                    // Diamonds and arrows
+                    tx('Skill moves', PX, OAY+54,'#aabbcc',12);
+                    tx('◆'.repeat(playerData.skillMoves||0), PX+110, OAY+54,'#00d4ff',14,'700');
+                    tx('Injury res.',  PX, OAY+76,'#aabbcc',12);
+                    tx('◆'.repeat(playerData.injuryResistance||0), PX+110, OAY+76,'#00d4ff',14,'700');
+                    tx('Actual form',  PX, OAY+98,'#aabbcc',12);
+                    tx('→'.repeat(playerData.actualForm||0), PX+110, OAY+98,'#ffd700',14,'700');
+
+                    // ── Stat columns ─────────────────────────────────────────
+                    const COLS = isGK ? [
+                        {title:'GOALKEEPING',  keys:['diving','handling','gkKicking','reflexes','gkPositioning'],     labels:['Diving','Handling','Kicking','Reflexes','Positioning']},
+                        {title:'GEN. ABILITIES',keys:['shotPower','shotPrecision','freeKickAbility','penalty','heading'],labels:['Shot power','Shot prec.','Free kick','Penalty','Heading']},
+                        {title:'PLAYMAKING',   keys:['passPrecision','ballControl','vision','balance','clearance'],   labels:['Pass prec.','Ball control','Vision','Balance','Clearance']},
+                        {title:'PHYSICAL',     keys:['sprintSpeed','speed','physicalResistance','stamina'],           labels:['Sprint speed','Speed','Physical res.','Stamina']},
+                    ] : [
+                        {title:'ATTACKING',    keys:['attackingAbilities','ballControl','dribbling','shotPower','shotPrecision','freeKickAbility','penalty','curl','volley','finishing'],labels:['Att. abilities','Ball control','Dribbling','Shot power','Shot prec.','Free kick','Penalty','Curl','Volley','Finishing']},
+                        {title:'DEFENDING',    keys:['defendingAbilities','tightPossession','ballTackle','heading','slidingTackle'],labels:['Def. abilities','Tight poss.','Ball tackle','Heading','Sliding tackle']},
+                        {title:'PLAYMAKING',   keys:['passPrecision','loftedPass','vision','positioning','balance'],  labels:['Pass prec.','Lofted pass','Vision','Positioning','Balance']},
+                        {title:'PHYSICAL',     keys:['sprintSpeed','speed','physicalResistance','stamina'],           labels:['Sprint speed','Speed','Physical res.','Stamina']},
+                    ];
+
+                    const CX=222, CY=100;
+                    const CW=Math.floor((W-CX-16)/4);
+                    const maxStat=COLS.reduce((m,c)=>Math.max(m,c.keys.length),0);
+
+                    COLS.forEach((col,ci) => {
+                        const x=CX+ci*CW;
+                        const avg=cAvg(col.keys);
+                        const color=sColor(avg);
+
+                        rr(x+3,CY,CW-6,H-CY-14,8,'rgba(255,255,255,0.035)','rgba(255,255,255,0.07)',1);
+
+                        // Title
+                        tx(col.title, x+CW/2, CY+16, color, 11, '800', 'center');
+
+                        // Separator
+                        ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+                        ctx.beginPath(); ctx.moveTo(x+12,CY+27); ctx.lineTo(x+CW-12,CY+27); ctx.stroke();
+                        ctx.restore();
+
+                        // Circle
+                        dc(x+CW/2, CY+64, avg, 27);
+
+                        // Stats
+                        col.keys.forEach((k,i) => {
+                            const v=playerData[k]||50;
+                            const sy=CY+108+i*22;
+                            rr(x+6,sy-9,CW-12,18,3,'rgba(0,0,0,0.25)',null);
+                            tx(col.labels[i]+'-', x+10,  sy, '#ccd8e8', 11);
+                            tx(v,                 x+CW-10, sy, sColor(v), 11, '700', 'right');
+                        });
+                    });
+
+                    // ── Bottom: skills + position grid ───────────────────────
+                    const lastStatY = CY+108+(maxStat-1)*22+9+14;
+                    const BotY = lastStatY + 20;
+
+                    // Special Skills
+                    if(playerData.selectedSkills.length > 0){
+                        tx('Special Skills:',CX,BotY,'#ffffff',12,'700');
+                        const perCol = Math.ceil(playerData.selectedSkills.length/4);
+                        playerData.selectedSkills.forEach((s,i) => {
+                            const col=Math.floor(i/perCol), row=i%perCol;
+                            tx(s+' ⭐', CX+col*195, BotY+18+row*18, '#ffffff', 11);
+                        });
+                    }
+
+                    // Position grid
+                    const PGX=W-175, PGY=BotY-5;
+                    const PCW=52, PCH=30, PGAP=2;
+                    const POS_ROWS=[['LF','ST','RF'],['LM','AM','RM'],['','CM',''],['','DM',''],['LB','CB','RB'],['','GK','']];
+                    const altPos2=playerData.altPositions||{};
+
+                    rr(PGX-4,PGY-4,PCW*3+PGAP*2+8,PCH*6+PGAP*5+8,6,'#081624',null);
+
+                    POS_ROWS.forEach((row,ri) => row.forEach((pos,ci) => {
+                        if(!pos) return;
+                        const px=PGX+ci*(PCW+PGAP), py=PGY+ri*(PCH+PGAP);
+                        const isPrim=pos===playerData.position, isAltP=altPos2[pos]!==undefined;
+                        const pbg=isPrim?sColor(playerData.rating):isAltP?sColor(altPos2[pos]||50):'#0f2236';
+                        const ptc=(isPrim||isAltP)?'#000':'#4a6070';
+                        rr(px,py,PCW,PCH,3,pbg,null);
+                        const midY = py+(isPrim||isAltP ? PCH/2-5 : PCH/2);
+                        tx(pos,px+PCW/2,midY,ptc,10,'800','center');
+                        if(isPrim||isAltP){
+                            const rval=isPrim?playerData.rating:(altPos2[pos]||50);
+                            tx('('+rval+')',px+PCW/2,py+PCH/2+7,'rgba(0,0,0,0.65)',9,'600','center');
+                        }
+                    }));
+
+                    // ── Download ─────────────────────────────────────────────
+                    const dlLink=document.createElement('a');
+                    dlLink.download=`${(playerData.name||'player').replace(/\s+/g,'_')}_card.png`;
+                    dlLink.href=canvas.toDataURL('image/png');
+                    dlLink.click();
+
+                    setStatus({type:'success',message:'✅ Card PNG generat și descărcat!'});
+                } catch(err){
+                    console.error(err);
+                    setStatus({type:'error',message:`❌ Eroare PNG: ${err.message}`});
+                }
+                setLoading(false);
+                setTimeout(()=>setStatus({type:'',message:''}),4000);
+            };
+            // ──────────────────────────────────────────────────────────────
+
+            // Găsim logo-ul clubului selectat
+            const selectedClub = CLUBS.find(c => c.name === playerData.club);
+
+            return (
+                <div className="app-container">
+                    <div className="app-header">
+                        <h1>⚽ PLAYER CARD GENERATOR</h1>
+                        <p className="subtitle">Creează și importă carduri profesionale de jucători în format Excel</p>
+                    </div>
+
+                    <div className="main-container">
+                        <div className="sidebar">
+                            <div className="card">
+                                <div className="import-section">
+                                    <h3>📥 IMPORTĂ DIN EXCEL</h3>
+                                    <p style={{fontSize: '0.9rem', color: '#8899aa', marginBottom: '15px'}}>
+                                        Încarcă un fișier Excel existent pentru a edita un jucător
+                                    </p>
+                                    <input 
+                                        type="file" 
+                                        accept=".xlsx,.xls" 
+                                        onChange={handleExcelImport}
+                                        style={{display: 'none'}} 
+                                        id="excelImportInput"
+                                    />
+                                    <button 
+                                        className="btn-import" 
+                                        onClick={() => document.getElementById('excelImportInput').click()}
+                                        style={{width: '100%'}}
+                                    >
+                                        📂 Selectează Fișier Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="card">
+                                <div className="section-title">📝 Date Jucător</div>
+                                <div className="grid-2">
+                                    <div className="input-group">
+                                        <label>Nume</label>
+                                        <input value={playerData.name} onChange={(e) => handleInputChange('name', e.target.value)} />
+                                    </div>
+                                    <div className="input-group" style={{gridColumn: '1 / -1'}}>
+                                        <label>Club</label>
+                                        <CustomSelect
+                                            value={playerData.club}
+                                            icon={playerData.clubLogo}
+                                            iconType="logo"
+                                            options={CLUBS}
+                                            placeholder="Selectează sau scrie club..."
+                                            onChange={o => { handleInputChange('club', o.name); handleInputChange('clubLogo', o.logo || ''); }}
+                                        />
+                                    </div>
+                                    <div className="input-group" style={{gridColumn: '1 / -1'}}>
+                                        <label>Țară</label>
+                                        <CustomSelect
+                                            value={playerData.nationality}
+                                            icon={playerData.nationalityFlag}
+                                            iconType="flag"
+                                            options={COUNTRIES}
+                                            placeholder="Selectează sau scrie țara..."
+                                            onChange={o => { handleInputChange('nationality', o.name); handleInputChange('nationalityFlag', o.flag || ''); }}
+                                        />
+                                    </div>
+                                    <div className="input-group">
+                                        <label>Poziție</label>
+                                        <select value={playerData.position} onChange={(e) => handleInputChange('position', e.target.value)}>
+                                            {POSITIONS.map(pos => <option key={pos} value={pos}>{pos}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="input-group">
+                                        <label>Rating</label>
+                                        <input type="number" min="50" max="99" value={playerData.rating}
+                                               onChange={(e) => handleInputChange('rating', parseInt(e.target.value))} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="card">
+                                <div className="section-title green">📸 Imagine Jucător</div>
+                                <div className={`image-upload${isDragOver ? ' drag-over' : ''}`}
+                                    onClick={() => document.getElementById('imageInput').click()}
+                                    onDragOver={handleDragOver}
+                                    onDragEnter={handleDragEnter}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
+                                    {playerData.imageUrl ? (
+                                        <img src={playerData.imageUrl} className="image-preview" alt="Player" />
+                                    ) : (
+                                        <div>
+                                            <p style={{color: isDragOver ? '#00d4ff' : '#8899aa', fontWeight: isDragOver ? '700' : '400', transition: 'all 0.2s'}}>
+                                                {isDragOver ? '📸 Eliberează pentru a încărca!' : 'Click sau trage imaginea aici'}
+                                            </p>
+                                            <p style={{color: '#556677', fontSize: '0.78rem', marginTop: '8px'}}>PNG, JPG, WEBP acceptate</p>
+                                        </div>
+                                    )}
+                                    <input id="imageInput" type="file" accept="image/*" style={{display: 'none'}} onChange={handleImageUpload} />
+                                </div>
+
+                                <p className="info-text">* Imaginea va fi inclusă în Excel (120x120px)</p>
+                            </div>
+
+                            <div className="card">
+                                <div className="section-title">⚙️ Alte Abilități</div>
+                                <div className="input-group">
+                                    <label>Weak Foot (50-99)</label>
+                                    <input type="number" min="50" max="99" value={playerData.weakFoot}
+                                           onChange={(e) => handleInputChange('weakFoot', parseInt(e.target.value))} />
+                                </div>
+                                <div className="input-group">
+                                    <label>Skill Moves (1-5 ⭐)</label>
+                                    <input type="number" min="1" max="5" value={playerData.skillMoves}
+                                           onChange={(e) => handleInputChange('skillMoves', parseInt(e.target.value))} />
+                                </div>
+                                <div className="input-group">
+                                    <label>Injury Resistance (1-5 ⭐)</label>
+                                    <input type="number" min="1" max="5" value={playerData.injuryResistance}
+                                           onChange={(e) => handleInputChange('injuryResistance', parseInt(e.target.value))} />
+                                </div>
+                                <div className="input-group">
+                                    <label>Actual Form (1-5 ➡️)</label>
+                                    <input type="number" min="1" max="5" value={playerData.actualForm}
+                                           onChange={(e) => handleInputChange('actualForm', parseInt(e.target.value))} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="main-content">
+                            <div className="card">
+                                <div className="section-title">📊 Statistici</div>
+                                <div className="tabs">
+                                    {isGK ? (
+                                        <>
+                                            {['goalkeeping','defending','playmaking','physical'].map(tab => (
+                                                <button key={tab} className={`tab ${activeTab === tab ? 'active' : ''}`}
+                                                        onClick={() => setActiveTab(tab)}>{tab}</button>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {['attacking','defending','playmaking','physical'].map(tab => (
+                                                <button key={tab} className={`tab ${activeTab === tab ? 'active' : ''}`}
+                                                        onClick={() => setActiveTab(tab)}>{tab}</button>
+                                            ))}
+                                        </>
+                                    )}
+                                </div>
+
+                                {activeTab === 'goalkeeping' && isGK && (
+                                    <div>
+                                        <CatHeader emoji="🧤" title="GOALKEEPING"
+                                            statKeys={['diving','handling','gkKicking','reflexes','gkPositioning']}
+                                            onAuto={() => autoGenerateStats('goalkeeping')} />
+                                        <div className="stats-grid">
+                                            {[
+                                                {key: 'diving', label: 'Diving'},
+                                                {key: 'handling', label: 'Handling'},
+                                                {key: 'gkKicking', label: 'Kicking'},
+                                                {key: 'reflexes', label: 'Reflexes'},
+                                                {key: 'gkPositioning', label: 'Positioning'}
+                                            ].map(s => <StatRow key={s.key} statKey={s.key} label={s.label} />)}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'attacking' && !isGK && (
+                                    <div>
+                                        <CatHeader emoji="⚔️" title="ATTACKING"
+                                            statKeys={['attackingAbilities','ballControl','dribbling','shotPower','shotPrecision','freeKickAbility','penalty','curl','volley','finishing']}
+                                            onAuto={() => autoGenerateStats('attacking')} />
+                                        <div className="stats-grid">
+                                            {[
+                                                {key:'attackingAbilities', label:'Attacking Abilities'},
+                                                {key:'ballControl',        label:'Ball Control'},
+                                                {key:'dribbling',          label:'Dribbling'},
+                                                {key:'shotPower',          label:'Shot Power'},
+                                                {key:'shotPrecision',      label:'Shot Precision'},
+                                                {key:'freeKickAbility',    label:'Free Kick Ability'},
+                                                {key:'penalty',            label:'Penalty'},
+                                                {key:'curl',               label:'Curl'},
+                                                {key:'volley',             label:'Volley'},
+                                                {key:'finishing',          label:'Finishing'},
+                                            ].map(s => <StatRow key={s.key} statKey={s.key} label={s.label} />)}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'defending' && (
+                                    <div>
+                                        <CatHeader emoji="🛡️" title="DEFENDING"
+                                            statKeys={['defendingAbilities','tightPossession','ballTackle','heading','slidingTackle']}
+                                            onAuto={() => autoGenerateStats('defending')} />
+                                        <div className="stats-grid">
+                                            {[
+                                                {key:'defendingAbilities', label:'Defending Abilities'},
+                                                {key:'tightPossession',    label:'Tight Possession'},
+                                                {key:'ballTackle',         label:'Ball Tackle'},
+                                                {key:'heading',            label:'Heading'},
+                                                {key:'slidingTackle',      label:'Sliding Tackle'},
+                                            ].map(s => <StatRow key={s.key} statKey={s.key} label={s.label} />)}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'playmaking' && (
+                                    <div>
+                                        <CatHeader emoji="🎯" title="PLAYMAKING"
+                                            statKeys={isGK
+                                                ? ['passPrecision','ballControl','vision','balance','clearance']
+                                                : ['passPrecision','loftedPass','vision','positioning','balance']}
+                                            onAuto={() => autoGenerateStats('playmaking')} />
+                                        <div className="stats-grid">
+                                            {isGK ? (
+                                                [
+                                                    {key:'passPrecision', label:'Pass Precision'},
+                                                    {key:'ballControl',   label:'Ball Control'},
+                                                    {key:'vision',        label:'Vision'},
+                                                    {key:'balance',       label:'Balance (Jumping)'},
+                                                    {key:'clearance',     label:'Clearance'},
+                                                ].map(s => <StatRow key={s.key} statKey={s.key} label={s.label} />)
+                                            ) : (
+                                                [
+                                                    {key:'passPrecision', label:'Pass Precision'},
+                                                    {key:'loftedPass',    label:'Lofted Pass'},
+                                                    {key:'vision',        label:'Vision'},
+                                                    {key:'positioning',   label:'Positioning'},
+                                                    {key:'balance',       label:'Balance'},
+                                                ].map(s => <StatRow key={s.key} statKey={s.key} label={s.label} />)
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'physical' && (
+                                    <div>
+                                        <CatHeader emoji="💪" title="PHYSICAL"
+                                            statKeys={['sprintSpeed','speed','physicalResistance','stamina']}
+                                            onAuto={() => autoGenerateStats('physical')} />
+                                        <div className="stats-grid">
+                                            {[
+                                                {key:'sprintSpeed',          label:'Sprint Speed'},
+                                                {key:'speed',                label:'Speed'},
+                                                {key:'physicalResistance',   label:'Physical Resistance'},
+                                                {key:'stamina',              label:'Stamina'},
+                                            ].map(s => <StatRow key={s.key} statKey={s.key} label={s.label} />)}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="card">
+                                <div className="section-title">✨ Special Skills</div>
+                                <p style={{ color: '#8899aa', marginBottom: '20px', fontSize: '0.95rem' }}>
+                                    Selectează abilitățile speciale ale jucătorului ({playerData.selectedSkills.length} selectate)
+                                </p>
+                                <div className="skills-container">
+                                    {SPECIAL_SKILLS.map(skill => (
+                                        <div key={skill} className={`skill-item ${playerData.selectedSkills.includes(skill) ? 'selected' : ''}`}
+                                             onClick={() => toggleSkill(skill)}>
+                                            <input type="checkbox" className="skill-checkbox"
+                                                   checked={playerData.selectedSkills.includes(skill)} onChange={() => {}} />
+                                            <span className="skill-label">{skill}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="card">
+                                <div className="section-title">🗺️ Poziții Jucător</div>
+                                <p style={{ color: '#8899aa', marginBottom: '16px', fontSize: '0.9rem' }}>
+                                    Poziția primară <span style={{color:'#1bc8b8', fontWeight:700}}>{playerData.position}</span> e evidențiată automat.
+                                    Click pe orice altă poziție pentru a o adăuga ca alternativă și introdu ratingul.
+                                </p>
+                                <PositionGrid />
+                            </div>
+
+                            <div className="card" style={{ textAlign: 'center' }}>
+                                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                    <button className="btn-generate" onClick={generateExcel} disabled={loading}>
+                                        {loading ? '⏳ Generare...' : '⚽ GENEREAZĂ EXCEL CU IMAGINE'}
+                                    </button>
+                                    <button className="btn-generate" onClick={generatePNG} disabled={loading}
+                                        style={{ background: 'linear-gradient(135deg, #7928ca 0%, #c0137a 50%, #ff0080 100%)', backgroundSize: '200% 200%', animation: 'gradient-shift 3s ease infinite' }}>
+                                        {loading ? '⏳ Generare...' : '🖼️ SALVEAZĂ CA PNG'}
+                                    </button>
+                                </div>
+                                {status.message && (
+                                    <div className={`status-message status-${status.type}`}>
+                                        {status.type === 'loading' && <span className="loading-spinner"></span>}
+                                        {status.message}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Floating Action Button (DB Comparator) ── */}
+                    <button className="comp-fab" onClick={() => setCompOpen(true)} title="Compară cu baza de date">
+                        <span>🔍</span>
+                        <span className="comp-fab-label">COMPARE</span>
+                    </button>
+
+                    {/* ── DB Comparator Overlay ── */}
+                    {compOpen && (
+                    <div className="comp-overlay" onClick={e => { if (e.target === e.currentTarget) setCompOpen(false); }}>
+                        <div className="comp-panel">
+                            <div className="comp-header">
+                                <div className="comp-header-top">
+                                    <span className="comp-title">⚡ DB COMPARATOR</span>
+                                    <button className="comp-close" onClick={() => setCompOpen(false)}>✕</button>
+                                </div>
+                                <div className="comp-subtitle">
+                                    Caută în <strong>baza de date 2026</strong> și compară statisticile cu cardul tău.
+                                </div>
+                                <div className="comp-search-row">
+                                    <input
+                                        className="comp-input"
+                                        placeholder="ex: Mbappe, Bellingham, Salah..."
+                                        value={compSearch}
+                                        onChange={e => setCompSearch(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && searchLocalDB()}
+                                        autoComplete="off"
+                                        spellCheck="false"
+                                        style={{fontSize:'1.05rem', padding:'14px 18px'}}
+                                    />
+                                    <button className="comp-search-btn" onClick={searchLocalDB}>
+                                        🔍 Caută
+                                    </button>
+                                </div>
+                                {compError && <div className="comp-error">⚠️ {compError}</div>}
+                            </div>
+
+                            <div className="comp-body">
+                                {!compResult && compCandidates.length === 0 && !compError && (
+                                    <div className="comp-empty">
+                                        <div className="comp-empty-icon">⚽</div>
+                                        <div className="comp-empty-text">
+                                            Introdu numele, clubul sau naționalitatea unui jucător și apasă <strong style={{color:'#c084fc'}}>Caută</strong>.<br/>
+                                            Statisticile vor fi preluate din <strong style={{color:'#c084fc'}}>baza de date 2026</strong> și comparate cu cardul tău.
+                                        </div>
+                                    </div>
+                                )}
+
+                                {compCandidates.length > 1 && !compResult && (
+                                    <div>
+                                        <div className="comp-candidates-header">
+                                            S-au găsit <strong>{compCandidates.length} jucători</strong>. Alege unul:
+                                        </div>
+                                        <div className="comp-candidates-list">
+                                            {compCandidates.map((p, i) => (
+                                                <button key={i} className="comp-candidate-btn" onClick={() => applyDBPlayer(p)}>
+                                                    <div className="comp-candidate-rating">{p.rating}</div>
+                                                    <div className="comp-candidate-info">
+                                                        <div className="comp-candidate-name">{p.name}</div>
+                                                        <div className="comp-candidate-meta">{p.position} · {p.club} · {p.nationality}</div>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {compResult && (() => {
+                                    const currentIsGK = playerData.position === 'GK';
+                                    const visibleCats = currentIsGK
+                                        ? { 'Goalkeeping': COMP_CATEGORIES['Goalkeeping'], 'Playmaking': COMP_CATEGORIES['Playmaking'], 'Physical': COMP_CATEGORIES['Physical'] }
+                                        : { 'Attacking': COMP_CATEGORIES['Attacking'], 'Defending': COMP_CATEGORIES['Defending'], 'Playmaking': COMP_CATEGORIES['Playmaking'], 'Physical': COMP_CATEGORIES['Physical'] };
+                                    return (
+                                        <div>
+                                            <div className="comp-player-card">
+                                                <div className="comp-player-rating">{compResult.overall || '?'}</div>
+                                                <div className="comp-player-info">
+                                                    <div className="comp-player-name">{compResult.playerName}</div>
+                                                    <div className="comp-player-meta">
+                                                        {compResult.position} · {compResult.club} · {compResult.nationality}{compResult.age ? ` · ${compResult.age} ani` : ''}
+                                                    </div>
+                                                </div>
+                                                <div className="comp-source-badge">{compResult.source}</div>
+                                            </div>
+
+                                            <button className="comp-apply-all" onClick={applyAllCompStats}>
+                                                ✅ APLICĂ TOATE STATISTICILE LA CARDUL MEU
+                                            </button>
+
+                                            <div className="comp-legend">
+                                                <div className="comp-legend-item"><div className="comp-legend-dot" style={{background:'linear-gradient(135deg,#7928ca,#ff0080)'}}></div> DB 2026</div>
+                                                <div className="comp-legend-item"><div className="comp-legend-dot" style={{background:'rgba(70,100,140,0.7)'}}></div> Cardul tău</div>
+                                                <div className="comp-legend-item" style={{color:'#00e87a'}}>▲ mai mare</div>
+                                                <div className="comp-legend-item" style={{color:'#ff5252'}}>▼ mai mic</div>
+                                            </div>
+
+                                            {/* ── Profile Info Section ── */}
+                                            <div className="comp-cat-title">Profil Jucător</div>
+                                            {[
+                                                { label: 'Nume', dbVal: compResult.playerName, myVal: playerData.name, apply: () => handleInputChange('name', compResult.playerName), isText: true },
+                                                { label: 'Club', dbVal: compResult.club, myVal: playerData.club, apply: () => handleInputChange('club', compResult.club), isText: true },
+                                                { label: 'Naționalitate', dbVal: compResult.nationality, myVal: playerData.nationality, apply: () => handleInputChange('nationality', compResult.nationality), isText: true },
+                                                { label: 'Poziție', dbVal: compResult.position, myVal: playerData.position, apply: () => { if (POSITIONS.includes(compResult.position)) handleInputChange('position', compResult.position); }, isText: true },
+                                                { label: 'Rating', dbVal: compResult.overall, myVal: playerData.rating, apply: () => handleInputChange('rating', Math.min(99, Math.max(50, compResult.overall))), isText: false },
+                                                ...(compResult.weakFoot !== undefined ? [{ label: 'Weak Foot', dbVal: compResult.weakFoot, myVal: playerData.weakFoot, apply: () => handleInputChange('weakFoot', compResult.weakFoot), isText: false }] : []),
+                                                ...(compResult.skillMoves !== undefined ? [{ label: 'Skill Moves ⭐', dbVal: compResult.skillMoves, myVal: playerData.skillMoves, apply: () => handleInputChange('skillMoves', compResult.skillMoves), isText: false }] : []),
+                                                ...(compResult.injuryResistance !== undefined ? [{ label: 'Injury Resistance', dbVal: compResult.injuryResistance, myVal: playerData.injuryResistance, apply: () => handleInputChange('injuryResistance', compResult.injuryResistance), isText: false }] : []),
+                                                ...(compResult.actualForm !== undefined ? [{ label: 'Actual Form', dbVal: compResult.actualForm, myVal: playerData.actualForm, apply: () => handleInputChange('actualForm', compResult.actualForm), isText: false }] : []),
+                                            ].map(({ label, dbVal, myVal, apply, isText }) => {
+                                                if (dbVal === undefined || dbVal === null) return null;
+                                                const isSame = String(dbVal) === String(myVal);
+                                                return (
+                                                    <div className="comp-stat-row" key={label} style={{alignItems:'center'}}>
+                                                        <div className="comp-stat-header">
+                                                            <span className="comp-stat-name">{label}</span>
+                                                            <div className="comp-stat-vals" style={{flex:1, justifyContent:'flex-end', gap:'6px'}}>
+                                                                <span style={{color:'#c084fc', fontWeight:700, fontSize:'0.9rem'}}>{String(dbVal)}</span>
+                                                                {!isSame && <><span className="comp-stat-sep">vs</span><span className="comp-stat-mine" style={{opacity:0.6}}>{String(myVal)}</span></>}
+                                                                {isSame && <span style={{color:'#8090a0', fontSize:'0.78rem'}}>= identic</span>}
+                                                            </div>
+                                                            <button className="comp-apply-btn" onClick={apply} disabled={isSame} style={isSame ? {opacity:0.35} : {}}>✓ Aplică</button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {Object.entries(visibleCats).map(([catName, keys]) => (
+                                                <div key={catName}>
+                                                    <div className="comp-cat-title">{catName}</div>
+                                                    {keys.map(key => {
+                                                        const realVal = compResult.stats[key];
+                                                        if (realVal === undefined) return null;
+                                                        const myVal = playerData[key] || 50;
+                                                        const diff = realVal - myVal;
+                                                        const dbColor = realVal >= 90 ? '#1bc8b8' : realVal >= 80 ? '#8bd44a' : realVal >= 70 ? '#f0c040' : '#e05555';
+                                                        const barDb = `${((realVal - 50) / 49 * 100).toFixed(1)}%`;
+                                                        const barMine = `${((myVal - 50) / 49 * 100).toFixed(1)}%`;
+                                                        return (
+                                                            <div className="comp-stat-row" key={key}>
+                                                                <div className="comp-stat-header">
+                                                                    <span className="comp-stat-name">{COMP_STAT_LABELS[key] || key}</span>
+                                                                    <div className="comp-stat-vals">
+                                                                        <span className="comp-stat-db" style={{color: dbColor}}>{realVal}</span>
+                                                                        <span className="comp-stat-sep">vs</span>
+                                                                        <span className="comp-stat-mine">{myVal}</span>
+                                                                    </div>
+                                                                    <span className={`comp-diff ${diff > 0 ? 'pos' : diff < 0 ? 'neg' : 'neu'}`}>
+                                                                        {diff > 0 ? `▲${diff}` : diff < 0 ? `▼${Math.abs(diff)}` : '='}
+                                                                    </span>
+                                                                    <button className="comp-apply-btn" onClick={() => applyCompStat(key, realVal)}>✓ Aplică</button>
+                                                                </div>
+                                                                <div className="comp-bar-wrap">
+                                                                    <div className="comp-bar-mine" style={{width: barMine}}></div>
+                                                                    <div className="comp-bar-db" style={{width: barDb, background: dbColor}}></div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ))}
+
+                                            <button onClick={() => { setCompResult(null); setCompCandidates([]); setCompSearch(''); }}
+                                                style={{marginTop:'20px', width:'100%', padding:'11px', borderRadius:'10px', border:'1px solid rgba(192,132,252,0.15)', background:'rgba(192,132,252,0.05)', color:'#8090a0', cursor:'pointer', fontSize:'0.82rem', fontFamily:'Outfit,sans-serif', fontWeight:600, transition:'all 0.15s', letterSpacing:'0.3px'}}>
+                                                ← Caută alt jucător
+                                            </button>
+                                            <div style={{height:'20px'}} />
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
