@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>⚽ Elite Football 26 — Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;600;700&family=Oxanium:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0b0d12;
+      --panel:#111520;
+      --border:#1e2840;
+      --accent:#c8ff00;
+      --accent2:#ffd700;
+      --red:#ff3c5f;
+      --txt:#e0e8ff;
+      --txt2:#6a7fa8;
+    }
+
+    body{
+      font-family:'Rajdhani',sans-serif;
+      background:var(--bg);
+      color:var(--txt);
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      overflow-x:hidden;
+    }
+
+    /* ── Animated background ── */
+    .bg-field{
+      position:fixed;inset:0;pointer-events:none;z-index:0;
+      background:
+        radial-gradient(ellipse at 20% 50%,rgba(200,255,0,.04) 0%,transparent 60%),
+        radial-gradient(ellipse at 80% 30%,rgba(255,215,0,.03) 0%,transparent 50%),
+        radial-gradient(ellipse at 50% 80%,rgba(0,180,255,.03) 0%,transparent 50%);
+    }
+    .bg-lines{
+      position:fixed;inset:0;pointer-events:none;z-index:0;
+      background:
+        repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(255,255,255,.012) 80px,rgba(255,255,255,.012) 81px),
+        repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(255,255,255,.012) 80px,rgba(255,255,255,.012) 81px);
+    }
+
+    /* ── Header ── */
+    header{
+      position:relative;z-index:10;
+      padding:40px 48px 0;
+      display:flex;flex-direction:column;align-items:center;
+      text-align:center;
+    }
+    .logo-ball{font-size:3.5rem;margin-bottom:8px;animation:spin 20s linear infinite}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+    .logo-title{
+      font-family:'Bebas Neue',cursive;
+      font-size:clamp(2.8rem,6vw,5rem);
+      letter-spacing:8px;line-height:1;
+      background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,#fff 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 0 40px rgba(200,255,0,.25));
+    }
+    .logo-sub{
+      font-size:.9rem;letter-spacing:4px;color:var(--txt2);
+      margin-top:8px;text-transform:uppercase;
+    }
+    .version-badge{
+      display:inline-block;margin-top:14px;
+      padding:4px 14px;background:rgba(200,255,0,.1);
+      border:1px solid rgba(200,255,0,.3);border-radius:20px;
+      font-size:.7rem;letter-spacing:3px;color:var(--accent);
+      font-weight:700;
+    }
+
+    /* ── Main content ── */
+    main{
+      position:relative;z-index:10;
+      flex:1;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:60px 24px;gap:40px;
+    }
+
+    /* ── Cards grid ── */
+    .cards-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+      gap:24px;
+      width:100%;max-width:900px;
+    }
+
+    .app-card{
+      position:relative;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:36px 32px;
+      cursor:pointer;
+      text-decoration:none;
+      color:inherit;
+      display:flex;flex-direction:column;gap:16px;
+      transition:all .3s cubic-bezier(.2,0,.1,1);
+      overflow:hidden;
+    }
+    .app-card::before{
+      content:'';position:absolute;inset:0;opacity:0;
+      transition:opacity .3s;
+      border-radius:20px;
+    }
+    .app-card:hover{
+      transform:translateY(-6px);
+      box-shadow:0 20px 60px rgba(0,0,0,.5);
+    }
+    .app-card:active{transform:translateY(-2px)}
+
+    /* Card 1 – Player Card */
+    .card-player::before{
+      background:radial-gradient(ellipse at top left,rgba(200,255,0,.12),transparent 60%);
+    }
+    .card-player:hover{border-color:rgba(200,255,0,.4);}
+    .card-player:hover::before{opacity:1}
+    .card-player .card-accent{color:var(--accent)}
+    .card-player .card-glow{
+      position:absolute;top:-40px;right:-40px;
+      width:200px;height:200px;border-radius:50%;
+      background:radial-gradient(circle,rgba(200,255,0,.08),transparent 70%);
+      pointer-events:none;
+    }
+
+    /* Card 2 – Data Generator */
+    .card-data::before{
+      background:radial-gradient(ellipse at top right,rgba(255,215,0,.12),transparent 60%);
+    }
+    .card-data:hover{border-color:rgba(255,215,0,.4);}
+    .card-data:hover::before{opacity:1}
+    .card-data .card-accent{color:var(--accent2)}
+    .card-data .card-glow{
+      position:absolute;top:-40px;right:-40px;
+      width:200px;height:200px;border-radius:50%;
+      background:radial-gradient(circle,rgba(255,215,0,.08),transparent 70%);
+      pointer-events:none;
+    }
+
+    .card-icon{
+      font-size:2.8rem;line-height:1;
+      position:relative;z-index:1;
+    }
+    .card-title{
+      font-family:'Bebas Neue',cursive;
+      font-size:1.8rem;letter-spacing:4px;
+      position:relative;z-index:1;
+    }
+    .card-desc{
+      font-size:.9rem;color:var(--txt2);line-height:1.6;
+      position:relative;z-index:1;
+    }
+    .card-features{
+      display:flex;flex-direction:column;gap:7px;
+      position:relative;z-index:1;margin-top:4px;
+    }
+    .card-feature{
+      display:flex;align-items:center;gap:10px;
+      font-size:.82rem;color:var(--txt2);
+    }
+    .card-feature::before{
+      content:'';width:6px;height:6px;border-radius:50%;
+      flex-shrink:0;background:currentColor;
+    }
+    .card-feature.on{color:var(--txt)}
+
+    .card-cta{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-top:auto;padding-top:16px;
+      border-top:1px solid var(--border);
+      font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:3px;
+      position:relative;z-index:1;
+    }
+    .cta-arrow{font-size:1.4rem;transition:transform .3s}
+    .app-card:hover .cta-arrow{transform:translateX(6px)}
+
+    /* ── Info strip ── */
+    .info-strip{
+      display:flex;gap:32px;align-items:center;flex-wrap:wrap;justify-content:center;
+      max-width:900px;width:100%;
+      padding:20px 32px;
+      background:rgba(255,255,255,.02);
+      border:1px solid var(--border);
+      border-radius:14px;
+    }
+    .info-item{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+    .info-num{
+      font-family:'Bebas Neue',cursive;font-size:2rem;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .info-label{font-size:.72rem;color:var(--txt2);letter-spacing:2px;text-transform:uppercase}
+
+    .info-sep{width:1px;height:40px;background:var(--border)}
+
+    /* ── Footer ── */
+    footer{
+      position:relative;z-index:10;
+      padding:20px 48px;
+      border-top:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      font-size:.75rem;color:var(--txt2);letter-spacing:1px;
+      flex-wrap:wrap;gap:8px;
+    }
+    footer span{opacity:.7}
+  </style>
+</head>
+<body>
+
+<div class="bg-field"></div>
+<div class="bg-lines"></div>
+
+<header>
+  <div class="logo-ball">⚽</div>
+  <div class="logo-title">ELITE FOOTBALL 26</div>
+  <div class="logo-sub">Creator Studio — Alege modulul</div>
+  <div class="version-badge">VERSIUNEA 2026 &nbsp;·&nbsp; 101 JUCĂTORI</div>
+</header>
+
+<main>
+
+  <!-- ── Stats strip ── -->
+  <div class="info-strip">
+    <div class="info-item">
+      <div class="info-num">101</div>
+      <div class="info-label">Jucători în baza de date</div>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <div class="info-num">34</div>
+      <div class="info-label">Atribute per jucător</div>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <div class="info-num">14+</div>
+      <div class="info-label">Efecte card FIFA</div>
+    </div>
+    <div class="info-sep"></div>
+    <div class="info-item">
+      <div class="info-num">2</div>
+      <div class="info-label">Module disponibile</div>
+    </div>
+  </div>
+
+  <!-- ── App cards ── -->
+  <div class="cards-grid">
+
+    <!-- Player Card Generator -->
+    <a class="app-card card-player" href="player-card/index.html">
+      <div class="card-glow"></div>
+      <div class="card-icon">🎴</div>
+      <div class="card-title"><span class="card-accent">Player</span> Card Generator</div>
+      <div class="card-desc">
+        Creează carduri FIFA/eFootball personalizate pentru orice jucător. Export PNG sau GIF animat cu efecte cinematice.
+      </div>
+      <div class="card-features">
+        <div class="card-feature on">✦ Import imagine din surse web sau drag and drop</div>
+        <div class="card-feature on">✦ 14 efecte card: Gold, UCL, TOTY, Heroes și altele</div>
+        <div class="card-feature on">✦ 13 efecte animate: Fire, Ice, Aurora, Plasma...</div>
+        <div class="card-feature on">✦ Export PNG HD + GIF animat</div>
+        <div class="card-feature on">✦ Selector club și naționalitate cu logo automat</div>
+      </div>
+      <div class="card-cta">
+        <span class="card-accent">Deschide Generator Card</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+
+    <!-- Data Generator -->
+    <a class="app-card card-data" href="data-generator/index.html">
+      <div class="card-glow"></div>
+      <div class="card-icon">📊</div>
+      <div class="card-title"><span class="card-accent" style="color:var(--accent2)">Date</span> Generator Excel</div>
+      <div class="card-desc">
+        Gestionează, editează și exportă date complete despre jucători. Creare fișiere Excel multi-sheet pentru simulatoare.
+      </div>
+      <div class="card-features">
+        <div class="card-feature on">✦ Baza de date cu 101 jucători de top (2026)</div>
+        <div class="card-feature on">✦ Editor atribute complet (34 statistici)</div>
+        <div class="card-feature on">✦ Export Excel (.xlsx) cu mai multe foi</div>
+        <div class="card-feature on">✦ Filtrare după club, naționalitate, poziție</div>
+        <div class="card-feature on">✦ Comparare jucători și clasamente</div>
+      </div>
+      <div class="card-cta">
+        <span style="color:var(--accent2)">Deschide Generator Date</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+
+  </div>
+
+</main>
+
+<footer>
+  <span>⚽ Elite Football 26 — Creator Studio</span>
+  <span>Player Card Generator · Excel Data Creator · players_db v2026</span>
+</footer>
+
+</body>
+</html>
